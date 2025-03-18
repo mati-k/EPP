@@ -1,11 +1,12 @@
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using EPP.Services;
 using EPP.ViewModels;
 using EPP.Views;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace EPP
 {
@@ -16,7 +17,7 @@ namespace EPP
             AvaloniaXamlLoader.Load(this);
         }
 
-        public override void OnFrameworkInitializationCompleted()
+        public async override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
@@ -27,9 +28,21 @@ namespace EPP
                 {
                     DataContext = new MainWindowViewModel(),
                 };
+
+                await LoadConfig(desktop.MainWindow.DataContext as MainWindowViewModel);
             }
 
             base.OnFrameworkInitializationCompleted();
+        }
+
+        private async Task LoadConfig(MainWindowViewModel viewModel)
+        {
+            var config = await ConfigPersistanceService.LoadFromFileAsync();
+
+            if (config is not null)
+            {
+                viewModel.SetupInitialValues(config);
+            }
         }
 
         private void DisableAvaloniaDataAnnotationValidation()

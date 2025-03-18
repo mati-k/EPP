@@ -22,10 +22,10 @@
     </Grid.RowDefinitions>
     <StackPanel HorizontalAlignment="Left" VerticalAlignment="Stretch" Margin="24" Grid.Row="0">
       <Button Content="Event File" Click="EventFile_Click" />
-      <TextBlock Text="{Binding EventFile}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      <TextBlock Text="{Binding EventPath}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
       <Button Content="Localization file" Click="LocalizationFile_Click" />
-      <TextBlock Text="{Binding LocalizationFile}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+      <TextBlock Text="{Binding LocalizationPath}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
 
       <Button Content="Source folders" Click="SourceDirectories_Click" />
       <ListBox ItemsSource="{Binding SourceDirectories}">

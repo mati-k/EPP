@@ -22,7 +22,7 @@ namespace EPP.Views
 
             if (!string.IsNullOrEmpty(filePath))
             {
-                ViewModel.EventFile = filePath;
+                ViewModel.EventPath = filePath;
             }
         }
 
@@ -32,7 +32,7 @@ namespace EPP.Views
 
             if (!string.IsNullOrEmpty(filePath))
             {
-                ViewModel.LocalizationFile = filePath;
+                ViewModel.LocalizationPath = filePath;
             }
         }
 
