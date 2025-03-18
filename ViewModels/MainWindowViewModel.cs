@@ -1,52 +1,42 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
 using EPP.Models;
-using EPP.Services;
-using System.Collections.ObjectModel;
-using System.Linq;
+using Pdoxcl2Sharp;
+using System;
+using System.IO;
+using System.Text;
 
 namespace EPP.ViewModels
 {
     public partial class MainWindowViewModel : ViewModelBase
     {
         [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(StartCommand))]
-        private string _eventPath = string.Empty;
+        private ViewModelBase _currentPage;
 
-        [ObservableProperty]
-        private string _localizationPath = string.Empty;
-
-        [ObservableProperty]
-        private bool _useBackups = true;
-
-        [ObservableProperty]
-        private ObservableCollection<string> _sourceDirectories = new();
-
-        [RelayCommand(CanExecute = nameof(CanStart))]
-        public async void Start()
+        public MainWindowViewModel()
         {
-            await ConfigPersistanceService.SaveToFileAsync(new ConfigData
+            CurrentPage = new ConfigurationViewModel();
+        }
+
+        public MainWindowViewModel(ConfigData config)
+        {
+            CurrentPage = new ConfigurationViewModel(config, MoveToEditor);
+        }
+
+        private void MoveToEditor(ConfigData config)
+        {
+            try
             {
-                EventPath = EventPath,
-                LocalizationPath = LocalizationPath,
-                SourceDirectories = SourceDirectories.ToList(),
-                UseBackups = UseBackups
-            });
-        }
+                string fileText = File.ReadAllText(config.EventPath);
+                using (Stream fileStream = new MemoryStream(Encoding.UTF8.GetBytes(fileText ?? "")))
+                {
+                    EventFile eventFile = ParadoxParser.Parse(fileStream, new EventFile());
+                    CurrentPage = new EditorViewModel(eventFile);
+                }
+            }
+            catch (Exception e)
+            {
 
-        public bool CanStart()
-        {
-            return !string.IsNullOrEmpty(EventPath) && SourceDirectories.Count > 0;
-        }
-
-        public void SetupInitialValues(ConfigData config)
-        {
-            EventPath = config.EventPath;
-            LocalizationPath = config.LocalizationPath;
-            UseBackups = config.UseBackups;
-            SourceDirectories = new ObservableCollection<string>(config.SourceDirectories);
-
-            StartCommand.NotifyCanExecuteChanged();
+            }
         }
     }
 }

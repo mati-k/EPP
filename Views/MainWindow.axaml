@@ -15,30 +15,5 @@
         <vm:MainWindowViewModel/>
     </Design.DataContext>
 
-  <Grid>
-    <Grid.RowDefinitions>
-      <RowDefinition Height="*"/>
-      <RowDefinition Height="Auto"/>
-    </Grid.RowDefinitions>
-    <StackPanel HorizontalAlignment="Left" VerticalAlignment="Stretch" Margin="24" Grid.Row="0">
-      <Button Content="Event File" Click="EventFile_Click" />
-      <TextBlock Text="{Binding EventPath}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-      <Button Content="Localization file" Click="LocalizationFile_Click" />
-      <TextBlock Text="{Binding LocalizationPath}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-
-      <Button Content="Source folders" Click="SourceDirectories_Click" />
-      <ListBox ItemsSource="{Binding SourceDirectories}">
-        <ListBox.ItemTemplate>
-          <DataTemplate>
-            <TextBlock Text="{Binding}"/>
-          </DataTemplate>
-        </ListBox.ItemTemplate>
-      </ListBox>
-      
-      <CheckBox Content="Use backups" IsChecked="{Binding UseBackups}"/>
-    </StackPanel >
-     <Button Content="Continue" Command="{Binding StartCommand}" HorizontalAlignment="Center" Grid.Row="0" VerticalAlignment="Bottom" Margin="24"/> 
-  </Grid>
-    
+    <TransitioningContentControl Content="{Binding CurrentPage}" />
 </Window>

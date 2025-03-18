@@ -2,11 +2,11 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using EPP.Models;
 using EPP.Services;
 using EPP.ViewModels;
 using EPP.Views;
 using System.Linq;
-using System.Threading.Tasks;
 
 namespace EPP
 {
@@ -21,28 +21,19 @@ namespace EPP
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
+                ConfigData config = await ConfigPersistanceService.LoadFromFileAsync();
+
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(),
+                    DataContext = new MainWindowViewModel(config),
                 };
 
-                await LoadConfig(desktop.MainWindow.DataContext as MainWindowViewModel);
             }
 
             base.OnFrameworkInitializationCompleted();
-        }
-
-        private async Task LoadConfig(MainWindowViewModel viewModel)
-        {
-            var config = await ConfigPersistanceService.LoadFromFileAsync();
-
-            if (config is not null)
-            {
-                viewModel.SetupInitialValues(config);
-            }
         }
 
         private void DisableAvaloniaDataAnnotationValidation()
