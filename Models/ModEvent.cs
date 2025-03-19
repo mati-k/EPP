@@ -1,17 +1,20 @@
-﻿using Pdoxcl2Sharp;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using Pdoxcl2Sharp;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace EPP.Models
 {
-    public class ModEvent : IParadoxRead
+    public partial class ModEvent : ObservableObject, IParadoxRead
     {
         public string Id { get; set; }
         public bool IsCountryEvent { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
-        public string Picture { get; set; } = "";
+        [ObservableProperty]
+        private string _picture;
+        public string OriginalPicture { get; set; } = "";
         public bool FireOnlyOnce { get; set; } = false;
         public bool IsTriggeredOnly { get; set; } = false;
         public bool Hidden { get; set; } = false;
@@ -61,6 +64,7 @@ namespace EPP.Models
                     if (String.IsNullOrWhiteSpace(Picture))
                         Picture = picture;
 
+                    OriginalPicture = picture;
                     break;
 
                 case "is_triggered_only": IsTriggeredOnly = parser.ReadBool(); break;

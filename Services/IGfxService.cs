@@ -1,4 +1,5 @@
 ﻿using Avalonia.Media.Imaging;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace EPP.Services
@@ -7,5 +8,6 @@ namespace EPP.Services
     {
         public Task LoadSourceDirectory(string? path);
         public Bitmap? GetPicture(string? name);
+        public List<string> GetPictureNames();
     }
 }

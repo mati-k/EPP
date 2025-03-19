@@ -6,6 +6,7 @@ using Pfim;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -108,7 +109,7 @@ namespace EPP.Services
                     try
                     {
                         var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
-                        return new Bitmap(PixelFormats.Bgra8888, AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
+                        return new Bitmap(PixelFormat(image), AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
                     }
 
                     catch (Exception e)
@@ -121,6 +122,32 @@ namespace EPP.Services
             {
                 return null;
             }
+        }
+
+        private static PixelFormat PixelFormat(IImage image)
+        {
+            switch (image.Format)
+            {
+                case ImageFormat.Rgb24:
+                    return PixelFormats.Bgr24;
+                case ImageFormat.Rgba32:
+                    return PixelFormats.Bgra8888;
+                case ImageFormat.Rgb8:
+                    return PixelFormats.Gray8;
+                case ImageFormat.R5g5b5a1:
+                    return PixelFormats.Bgr555;
+                case ImageFormat.R5g5b5:
+                    return PixelFormats.Bgr555;
+                case ImageFormat.R5g6b5:
+                    return PixelFormats.Bgr565;
+                default:
+                    throw new Exception($"Unable to convert {image.Format} to WPF PixelFormat");
+            }
+        }
+
+        public List<string> GetPictureNames()
+        {
+            return _gfxFiles.Keys.Where(key => key.Contains("eventPicture")).ToList();
         }
     }
 }

@@ -6,6 +6,7 @@
              xmlns:view="using:EPP.Views"
              xmlns:mock="using:EPP.Mock"
              x:DataType="vm:EditorViewModel"
+             xmlns:converters="using:EPP.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="EPP.Views.EditorView">
   <Design.DataContext>
@@ -14,8 +15,8 @@
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="250"/>
+      <ColumnDefinition Width="*" MinWidth="600"/>
       <ColumnDefinition Width="Auto"/>
-      <ColumnDefinition Width="*"/>
     </Grid.ColumnDefinitions>
 
     <ListBox ItemsSource="{Binding EventFile.Events}" SelectedItem="{Binding SelectedEvent}" Grid.Column="0">
@@ -27,5 +28,23 @@
     </ListBox>
 
     <view:EventView DataContext="{Binding SelectedEvent}" Grid.Column="1" />
+
+    <Grid Grid.Column="2">
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto"/>
+        <RowDefinition Height="*"/>
+      </Grid.RowDefinitions>
+      <TextBox Text="{Binding PictureQuery}" Width="512" Watermark="Filter pictures..." Grid.Row="0" Margin="0,0,0,10"/>
+      <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedEvent.Picture}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel>
+              <TextBlock Text="{Binding}" FontSize="12" TextAlignment="Center"/>
+              <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}"/>  
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </Grid>
   </Grid>
 </UserControl>
