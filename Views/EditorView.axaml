@@ -3,6 +3,7 @@
              xmlns:vm="using:EPP.ViewModels"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:view="using:EPP.Views"
              x:DataType="vm:EditorViewModel"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="EPP.Views.EditorView">
@@ -23,5 +24,7 @@
         </DataTemplate>
       </ListBox.ItemTemplate>
     </ListBox>
+
+    <view:EventView DataContext="{Binding SelectedEvent}" Grid.Column="1" />
   </Grid>
 </UserControl>

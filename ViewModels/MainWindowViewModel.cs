@@ -1,5 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using EPP.Models;
+using EPP.Services;
 using Pdoxcl2Sharp;
 using System;
 using System.IO;
@@ -22,8 +24,16 @@ namespace EPP.ViewModels
             CurrentPage = new ConfigurationViewModel(config, MoveToEditor);
         }
 
-        private void MoveToEditor(ConfigData config)
+        private async void MoveToEditor(ConfigData config)
         {
+            var gfxService = Ioc.Default.GetService<IGfxService>();
+
+            // Load in reverse order, later directories override earlier ones
+            for (int i = config.SourceDirectories.Count - 1; i >= 0; i--)
+            {
+                await gfxService.LoadSourceDirectory(config.SourceDirectories[i]);
+            }
+
             try
             {
                 string fileText = File.ReadAllText(config.EventPath);

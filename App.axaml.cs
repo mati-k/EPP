@@ -2,10 +2,12 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using EPP.Models;
 using EPP.Services;
 using EPP.ViewModels;
 using EPP.Views;
+using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
 
 namespace EPP
@@ -31,7 +33,13 @@ namespace EPP
                     DataContext = new MainWindowViewModel(config),
                 };
 
+                var services = new ServiceCollection();
+                services.AddSingleton<IFilesService>(x => new FilesService(desktop.MainWindow));
+                services.AddSingleton<IGfxService, GfxService>();
+
+                Ioc.Default.ConfigureServices(services.BuildServiceProvider());
             }
+
 
             base.OnFrameworkInitializationCompleted();
         }

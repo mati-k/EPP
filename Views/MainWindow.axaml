@@ -6,6 +6,7 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="EPP.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        xmlns:converters="using:EPP.Converters"
         Icon="/Assets/avalonia-logo.ico"
         Title="EPP">
 
@@ -14,6 +15,6 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
+  
     <TransitioningContentControl Content="{Binding CurrentPage}" />
 </Window>
