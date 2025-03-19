@@ -9,6 +9,8 @@ namespace EPP.Models
         public List<ModEvent> Events { get; set; } = new();
         public string Namespace { get; set; }
 
+        public EventFile() { }
+
         public void TokenCallback(ParadoxParser parser, string token)
         {
             if (token.Equals("namespace"))

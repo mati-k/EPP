@@ -26,18 +26,7 @@ namespace EPP.Models
         public GroupNode After { get; set; }
         public List<EventOption> Options { get; set; } = new();
 
-        public ModEvent()
-        {
-            Title = "Test";
-            Description = "My [Root.GetRulerTitleAndNameOrRegencyCap]. We got a small issue when it came to illuminating our cities. To make our urban centers safer and more inviting both for our people and for foreigners, we decided to add lamposts to illuminate the cities. Thinking that as wasteful, the Erectors came up with a better idea of substitutiong many smaller lamps with a single Giant Lamp Post in each of our cities, each one as bright as the sun! And it worked! It worked so well that the Cloak and Swaggers got annoyed cause the light took away their shadows, which they needed to do their thing you know? Let's say that the Swaggers decided to get rid of that issue their way... So which side do we side with";
-
-            Description = string.Concat(Enumerable.Repeat(Description, 10));
-            Options.Add(new EventOption() { Name = "Option 1" });
-            Options.Add(new EventOption() { Name = "Option 2" });
-            Options.Add(new EventOption() { Name = "Option 3" });
-            Options.Add(new EventOption() { Name = "Option 4" });
-            Options.Add(new EventOption() { Name = "Option 5" });
-        }
+        public ModEvent() { }
 
         public ModEvent(bool isCountryEvent)
         {
