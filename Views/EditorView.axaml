@@ -7,11 +7,15 @@
              xmlns:mock="using:EPP.Mock"
              x:DataType="vm:EditorViewModel"
              xmlns:converters="using:EPP.Converters"
+             xmlns:avalonia_converters="using:Avalonia.Controls.Converters"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="EPP.Views.EditorView">
   <Design.DataContext>
     <mock:MockEditorViewModel />
   </Design.DataContext>
+  <UserControl.Resources>
+    <avalonia_converters:DoNothingForNullConverter x:Key="DoNothingForNullConverter"/>
+  </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="250"/>
@@ -35,11 +39,11 @@
         <RowDefinition Height="*"/>
       </Grid.RowDefinitions>
       <TextBox Text="{Binding PictureQuery}" Width="512" Watermark="Filter pictures..." Grid.Row="0" Margin="0,0,0,10"/>
-      <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedEvent.Picture}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
+      <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedPicture, Mode=TwoWay}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
         <ListBox.ItemTemplate>
           <DataTemplate>
             <StackPanel>
-              <TextBlock Text="{Binding}" FontSize="12" TextAlignment="Center"/>
+              <TextBlock Text="{Binding Converter={x:Static converters:DDSConverter.AddDlcText}}" FontSize="12" TextAlignment="Center"/>
               <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}"/>  
             </StackPanel>
           </DataTemplate>

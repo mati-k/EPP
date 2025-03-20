@@ -8,6 +8,7 @@ namespace EPP.Services
     {
         public Task LoadSourceDirectory(string? path);
         public Bitmap? GetPicture(string? name);
+        public string? GetNameWithDlcText(string? name);
         public List<string> GetPictureNames();
     }
 }

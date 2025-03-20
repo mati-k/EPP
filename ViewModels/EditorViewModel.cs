@@ -20,14 +20,39 @@ namespace EPP.ViewModels
         private ObservableCollection<string> _pictures = new();
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor("ActivePictures")]
         private string _pictureQuery = "";
+
+        [ObservableProperty]
+        private string _selectedPicture;
 
         public ObservableCollection<string> ActivePictures
         {
             get
             {
                 return new ObservableCollection<string>(Pictures.Where(picture => picture.Contains(PictureQuery, System.StringComparison.OrdinalIgnoreCase)));
+            }
+        }
+
+        partial void OnSelectedEventChanged(ModEvent value)
+        {
+            SelectedPicture = value.Picture;
+        }
+
+        partial void OnSelectedPictureChanged(string value)
+        {
+            if (value != null)
+            {
+                SelectedEvent.Picture = value;
+            }
+        }
+
+        // Manualy update to restore selection if picture reappears
+        partial void OnPictureQueryChanged(string value)
+        {
+            this.OnPropertyChanged(nameof(ActivePictures));
+            if (SelectedPicture == null && ActivePictures.Contains(SelectedEvent.Picture))
+            {
+                SelectedPicture = SelectedEvent.Picture;
             }
         }
 
