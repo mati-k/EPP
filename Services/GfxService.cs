@@ -39,7 +39,7 @@ namespace EPP.Services
 
         private async Task LoadEventPictures(string path)
         {
-            var fileService = Ioc.Default.GetService<IFilesService>();
+            var fileService = Ioc.Default.GetService<IFileService>();
 
             var items = await fileService.ListFolderAsync(path);
             if (items == null)
@@ -70,7 +70,7 @@ namespace EPP.Services
 
         private async Task LoadEventInterface(string path)
         {
-            var fileService = Ioc.Default.GetService<IFilesService>();
+            var fileService = Ioc.Default.GetService<IFileService>();
             path = Path.Combine(path, _interfacePath);
 
             var items = await fileService.ListFolderAsync(path);

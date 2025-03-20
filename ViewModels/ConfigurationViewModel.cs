@@ -1,10 +1,13 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using Avalonia.Controls;
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
 using EPP.Models;
 using EPP.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace EPP.ViewModels
 {
@@ -23,22 +26,29 @@ namespace EPP.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _sourceDirectories = new();
 
-        private Action<ConfigData> _onContinue;
+        private Action<ConfigData>? _onContinue;
 
-        public ConfigurationViewModel() { }
-
-        public ConfigurationViewModel(ConfigData config, Action<ConfigData> onContinue)
+        public ConfigurationViewModel()
         {
-            if (config is not null)
+            if (Design.IsDesignMode)
             {
-                SetupInitialValues(config);
+                return;
             }
 
+            var configService = Ioc.Default.GetService<IConfigService>();
+            if (configService is not null && configService.ConfigData is not null)
+            {
+                SetupInitialValues(configService.ConfigData);
+            }
+        }
+
+        public ConfigurationViewModel(Action<ConfigData> onContinue) : this()
+        {
             _onContinue = onContinue;
         }
 
         [RelayCommand(CanExecute = nameof(CanStart))]
-        public async void Start()
+        public async Task Start()
         {
             var newConfig = new ConfigData
             {
@@ -48,7 +58,12 @@ namespace EPP.ViewModels
                 UseBackups = UseBackups
             };
 
-            await ConfigPersistanceService.SaveToFileAsync(newConfig);
+            var configService = Ioc.Default.GetService<IConfigService>();
+
+            if (configService != null)
+            {
+                await configService.SaveConfig(newConfig);
+            }
 
             if (_onContinue is not null)
             {

@@ -3,7 +3,6 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using CommunityToolkit.Mvvm.DependencyInjection;
-using EPP.Models;
 using EPP.Services;
 using EPP.ViewModels;
 using EPP.Views;
@@ -23,21 +22,21 @@ namespace EPP
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                ConfigData config = await ConfigPersistanceService.LoadFromFileAsync();
+                IConfigService configService = await ConfigService.LoadAndInitializeConfig();
+
+                var services = new ServiceCollection();
+                services.AddSingleton<IFileService>(x => new FileService(desktop));
+                services.AddSingleton<IGfxService, GfxService>();
+                services.AddSingleton<IConfigService>(configService);
+                Ioc.Default.ConfigureServices(services.BuildServiceProvider());
 
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
                 // More info: https://docs.avaloniaui.net/docs/guides/development-guides/data-validation#manage-validationplugins
                 DisableAvaloniaDataAnnotationValidation();
                 desktop.MainWindow = new MainWindow
                 {
-                    DataContext = new MainWindowViewModel(config),
+                    DataContext = new MainWindowViewModel(),
                 };
-
-                var services = new ServiceCollection();
-                services.AddSingleton<IFilesService>(x => new FilesService(desktop.MainWindow));
-                services.AddSingleton<IGfxService, GfxService>();
-
-                Ioc.Default.ConfigureServices(services.BuildServiceProvider());
             }
 
 

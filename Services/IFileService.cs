@@ -4,10 +4,10 @@ using System.Threading.Tasks;
 
 namespace EPP.Services
 {
-    public interface IFilesService
+    public interface IFileService
     {
-        public Task<IStorageFile?> OpenFileAsync();
-        public Task<IStorageFile?> SaveFileAsync();
+        public Task<IStorageFile?> OpenFileAsync(string filePath);
         public Task<IAsyncEnumerable<IStorageItem>?> ListFolderAsync(string folderPath);
+        public void CreateFileBackup(string filePath);
     }
 }

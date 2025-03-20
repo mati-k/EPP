@@ -6,15 +6,21 @@
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="EPP.Views.MainWindow"
         x:DataType="vm:MainWindowViewModel"
+        xmlns:mock="using:EPP.Mock"
         xmlns:converters="using:EPP.Converters"
         Icon="/Assets/avalonia-logo.ico"
         Title="EPP">
-
-    <Design.DataContext>
-        <!-- This only sets the DataContext for the previewer in an IDE,
-             to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-        <vm:MainWindowViewModel/>
+    <Design.DataContext >
+        <mock:MockMainWindowViewModel/>
     </Design.DataContext>
   
-    <TransitioningContentControl Content="{Binding CurrentPage}" />
+  <DockPanel >
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="_File">
+        <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
+      </MenuItem>
+    </Menu>
+    
+    <TransitioningContentControl Content="{Binding CurrentPage}"/>
+  </DockPanel>
 </Window>
