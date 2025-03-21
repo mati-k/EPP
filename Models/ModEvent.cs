@@ -18,9 +18,11 @@ namespace EPP.Models
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(IsChanged))]
         [NotifyCanExecuteChangedFor(nameof(ResetIconCommand))]
-
         private string _picture;
-        public string OriginalPicture { get; set; } = "";
+        [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(IsChanged))]
+        [NotifyCanExecuteChangedFor(nameof(ResetIconCommand))]
+        private string _originalPicture;
         public bool FireOnlyOnce { get; set; } = false;
         public bool IsTriggeredOnly { get; set; } = false;
         public bool Hidden { get; set; } = false;
@@ -55,7 +57,7 @@ namespace EPP.Models
                     case "desc":
                         string desc;
                         if (parser.NextIsBracketed())
-                            desc = (parser.Parse(new GroupNode()).Nodes.Where(n => n.Name.Equals("desc")).First() as ValueNode).Value;
+                            desc = (parser.Parse(new GroupNode()).Nodes.Where(n => n.Name.Equals("desc")).First() as ValueNode)!.Value;
                         else
                             desc = parser.ReadString();
 
@@ -66,7 +68,7 @@ namespace EPP.Models
                     case "picture":
                         string picture;
                         if (parser.NextIsBracketed())
-                            picture = (parser.Parse(new GroupNode()).Nodes.Where(n => n.Name.Equals("picture")).First() as ValueNode).Value;
+                            picture = (parser.Parse(new GroupNode()).Nodes.Where(n => n.Name.Equals("picture")).First() as ValueNode)!.Value;
                         else
                             picture = parser.ReadString();
 
@@ -104,7 +106,7 @@ namespace EPP.Models
         {
             Picture = OriginalPicture;
 
-            EditorViewModel viewModel = (EditorViewModel)editorView.DataContext;
+            EditorViewModel viewModel = (EditorViewModel)editorView.DataContext!;
             if (viewModel != null && viewModel.SelectedEvent == this)
             {
                 viewModel.SelectedPicture = OriginalPicture;

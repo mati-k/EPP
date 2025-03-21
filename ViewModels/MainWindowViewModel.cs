@@ -19,7 +19,7 @@ namespace EPP.ViewModels
         [ObservableProperty]
         private ViewModelBase _currentPage;
 
-        private EventFile _eventFile;
+        private EventFile? _eventFile;
 
         public MainWindowViewModel()
         {
@@ -28,7 +28,7 @@ namespace EPP.ViewModels
 
         private async void MoveToEditor(ConfigData config)
         {
-            var gfxService = Ioc.Default.GetService<IGfxService>();
+            var gfxService = Ioc.Default.GetService<IGfxService>()!;
 
             // Load in reverse order, later directories override earlier ones
             for (int i = config.SourceDirectories.Count - 1; i >= 0; i--)
@@ -43,8 +43,16 @@ namespace EPP.ViewModels
                 {
                     EventFile eventFile = ParadoxParser.Parse(fileStream, new EventFile());
                     _eventFile = eventFile;
-                    CurrentPage = new EditorViewModel(eventFile);
                 }
+
+                if (!string.IsNullOrEmpty(config.LocalizationPath))
+                {
+                    Localization localization = new Localization();
+                    await localization.LoadFromFileAsync(config.LocalizationPath);
+                    _eventFile.BindLocalization(localization);
+                }
+
+                CurrentPage = new EditorViewModel(_eventFile);
             }
             catch (Exception e)
             {
@@ -64,8 +72,7 @@ namespace EPP.ViewModels
                 fileService.CreateFileBackup(configService.ConfigData.EventPath);
             }
 
-            await EventSavingHelper.SaveEvent(_eventFile);
+            await EventSavingHelper.SaveEvent(_eventFile!);
         }
-
     }
 }

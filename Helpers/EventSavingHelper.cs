@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.DependencyInjection;
+using DialogHostAvalonia;
 using EPP.Models;
 using EPP.Services;
 using System;
@@ -56,11 +57,12 @@ namespace EPP.Helpers
                     int eventStart = GetEventStart(modEvent, fileContent, balance);
                     if (eventStart == -1)
                     {
-                        //todo
+                        await DialogHost.Show(new InfoDialogData($"Error occured during saving pictures, could not find matching event for {modEvent.Id}, check if file was changed by other applications"), "MainDialogHost");
                         return;
                     }
 
                     ReplacePicture(modEvent, fileContent, eventStart);
+                    modEvent.OriginalPicture = modEvent.Picture;
                 }
             }
 

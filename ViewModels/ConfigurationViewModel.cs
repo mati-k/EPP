@@ -58,12 +58,8 @@ namespace EPP.ViewModels
                 UseBackups = UseBackups
             };
 
-            var configService = Ioc.Default.GetService<IConfigService>();
-
-            if (configService != null)
-            {
-                await configService.SaveConfig(newConfig);
-            }
+            var configService = Ioc.Default.GetService<IConfigService>()!;
+            await configService.SaveConfig(newConfig);
 
             if (_onContinue is not null)
             {

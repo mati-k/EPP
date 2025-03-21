@@ -29,7 +29,7 @@
               </ToolTip.Tip>
             </Panel>
           </StackPanel>
-          <Button Content="Pick file" Click="EventFile_Click" Width="260" HorizontalAlignment="Left"/>
+          <Button Content="Pick file" Click="EventFile_Click" Width="250" HorizontalAlignment="Left"/>
           <TextBlock Text="{Binding EventPath}" Classes="Body2" />
         </StackPanel>
       </controls:Card>
@@ -45,7 +45,7 @@
               </ToolTip.Tip>
             </Panel>
           </StackPanel>
-          <Button Content="Pick File" Click="LocalizationFile_Click" />
+          <Button Content="Pick File" Click="LocalizationFile_Click" Width="250" HorizontalAlignment="Left"/>
           <TextBlock Text="{Binding LocalizationPath}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
         </StackPanel>
       </controls:Card>
@@ -68,7 +68,7 @@
               </ToolTip.Tip>
             </Panel>
           </StackPanel>
-          <Button Content="Add folder" Click="SourceDirectories_Click" />
+          <Button Content="Add folder" Click="SourceDirectories_Click" Width="250" HorizontalAlignment="Left"/>
           <ListBox ItemsSource="{Binding SourceDirectories}">
             <ListBox.ItemTemplate>
               <DataTemplate>
