@@ -1,10 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
 using CommunityToolkit.Mvvm.Input;
+using DialogHostAvalonia;
 using EPP.Helpers;
 using EPP.Models;
 using EPP.Services;
 using Pdoxcl2Sharp;
+using Serilog;
 using System;
 using System.IO;
 using System.Text;
@@ -46,7 +48,8 @@ namespace EPP.ViewModels
             }
             catch (Exception e)
             {
-
+                Log.Error(e, "Error occured during reading event file");
+                await DialogHost.Show(new InfoDialogData("Error occured during reading event file, see logs folder for more information"), "MainDialogHost");
             }
         }
 

@@ -3,7 +3,8 @@
              x:Class="EPP.App"
              xmlns:local="using:EPP"
              xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
-             RequestedThemeVariant="Default">
+             xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:themes="clr-namespace:Material.Styles.Themes;assembly=Material.Styles">
              <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
 
     <Application.DataTemplates>
@@ -11,7 +12,8 @@
     </Application.DataTemplates>
   
     <Application.Styles>
-        <FluentTheme />
-        <dialogHostAvalonia:DialogHostStyles />
+      <themes:MaterialTheme BaseTheme="Light" PrimaryColor="Purple" SecondaryColor="Lime" />
+      <dialogHostAvalonia:DialogHostStyles />
+      <materialIcons:MaterialIconStyles />
     </Application.Styles>
 </Application>
