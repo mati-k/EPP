@@ -45,18 +45,21 @@
           <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
         <TransitioningContentControl Content="{Binding CurrentPage}" Grid.Row="0"/>
-        <TransitioningContentControl Grid.Row="1" Content="{Binding EventFile.IsAnyEventChanged}" IsTransitionReversed="{Binding !EventFile.IsAnyEventChanged}">
-          <TransitioningContentControl.PageTransition>
-            <PageSlide Orientation="Vertical" Duration="0:00:00.300" />
-          </TransitioningContentControl.PageTransition>
-          <TransitioningContentControl.ContentTemplate>
-            <DataTemplate>
-              <controls:ColorZone Height="32" Padding="8" Mode="Inverted" IsVisible="{Binding}">
-                  <TextBlock Text="You have unsaved progress, press ctr+s to save" HorizontalAlignment="Right" VerticalAlignment="Center"/>
-              </controls:ColorZone>
-            </DataTemplate>
-          </TransitioningContentControl.ContentTemplate>
-        </TransitioningContentControl>
+        <Panel Classes.SlideOut="{Binding !EventFile.IsAnyEventChanged}" Grid.Row="1">
+          <Panel.Transitions>
+            <Transitions>
+              <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.300"/>
+            </Transitions>
+          </Panel.Transitions>
+          <Panel.Styles>
+            <Style Selector="Panel.SlideOut">
+              <Setter Property="RenderTransform" Value="translateY(32px)"/>
+            </Style>
+          </Panel.Styles>
+          <controls:ColorZone Height="32" Padding="8" Mode="Inverted">
+            <TextBlock Text="You have unsaved progress, press ctr+s to save" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+          </controls:ColorZone>
+          </Panel>
       </Grid>
     </DockPanel>
   </dialogHostAvalonia:DialogHost>
