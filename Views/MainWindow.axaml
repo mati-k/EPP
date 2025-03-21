@@ -10,6 +10,7 @@
         xmlns:mock="using:EPP.Mock"
         xmlns:converters="using:EPP.Converters"
         Icon="/Assets/avalonia-logo.ico"
+        xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
         xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
         Title="EPP">
     <Design.DataContext >
@@ -23,17 +24,40 @@
         <Button Content="Ok" Width="120" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHostAvalonia:DialogHost}, Path=CloseDialogCommand}"/>
       </StackPanel>
     </DataTemplate>
-  </Window.DataTemplates> 
+  </Window.DataTemplates>
+
+  <Window.KeyBindings>
+    <KeyBinding Gesture="Ctrl + S" Command="{Binding SaveCommand}" />
+  </Window.KeyBindings>
 
   <dialogHostAvalonia:DialogHost Identifier="MainDialogHost" DialogMargin="16" CloseOnClickAway="True" dialogHostAvalonia:DialogHostStyle.CornerRadius="8">
     <DockPanel>
       <Menu DockPanel.Dock="Top">
         <MenuItem Header="_File">
           <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
+          <MenuItem Header="_Reset All" Command="{Binding ResetAllCommand}" />
         </MenuItem>
       </Menu>
     
-      <TransitioningContentControl Content="{Binding CurrentPage}"/>
+      <Grid>
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*"/>
+          <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <TransitioningContentControl Content="{Binding CurrentPage}" Grid.Row="0"/>
+        <TransitioningContentControl Grid.Row="1" Content="{Binding EventFile.IsAnyEventChanged}" IsTransitionReversed="{Binding !EventFile.IsAnyEventChanged}">
+          <TransitioningContentControl.PageTransition>
+            <PageSlide Orientation="Vertical" Duration="0:00:00.300" />
+          </TransitioningContentControl.PageTransition>
+          <TransitioningContentControl.ContentTemplate>
+            <DataTemplate>
+              <controls:ColorZone Height="32" Padding="8" Mode="Inverted" IsVisible="{Binding}">
+                  <TextBlock Text="You have unsaved progress, press ctr+s to save" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+              </controls:ColorZone>
+            </DataTemplate>
+          </TransitioningContentControl.ContentTemplate>
+        </TransitioningContentControl>
+      </Grid>
     </DockPanel>
   </dialogHostAvalonia:DialogHost>
 </Window>

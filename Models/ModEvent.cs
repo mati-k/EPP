@@ -104,9 +104,14 @@ namespace EPP.Models
         [RelayCommand(CanExecute = nameof(IsChanged))]
         public void ResetIcon(EditorView editorView)
         {
+            EditorViewModel viewModel = (EditorViewModel)editorView.DataContext!;
+            ResetIcon(viewModel);
+        }
+
+        public void ResetIcon(EditorViewModel viewModel)
+        {
             Picture = OriginalPicture;
 
-            EditorViewModel viewModel = (EditorViewModel)editorView.DataContext!;
             if (viewModel != null && viewModel.SelectedEvent == this)
             {
                 viewModel.SelectedPicture = OriginalPicture;

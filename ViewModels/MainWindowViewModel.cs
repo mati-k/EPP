@@ -19,7 +19,10 @@ namespace EPP.ViewModels
         [ObservableProperty]
         private ViewModelBase _currentPage;
 
-        private EventFile? _eventFile;
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ResetAllCommand))]
+        private EventFile _eventFile = new();
 
         public MainWindowViewModel()
         {
@@ -42,17 +45,18 @@ namespace EPP.ViewModels
                 using (Stream fileStream = new MemoryStream(Encoding.UTF8.GetBytes(fileText ?? "")))
                 {
                     EventFile eventFile = ParadoxParser.Parse(fileStream, new EventFile());
-                    _eventFile = eventFile;
+                    EventFile = eventFile;
+                    eventFile.TrackEventChange();
                 }
 
                 if (!string.IsNullOrEmpty(config.LocalizationPath))
                 {
                     Localization localization = new Localization();
                     await localization.LoadFromFileAsync(config.LocalizationPath);
-                    _eventFile.BindLocalization(localization);
+                    EventFile.BindLocalization(localization);
                 }
 
-                CurrentPage = new EditorViewModel(_eventFile);
+                CurrentPage = new EditorViewModel(EventFile);
             }
             catch (Exception e)
             {
@@ -61,7 +65,7 @@ namespace EPP.ViewModels
             }
         }
 
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(IsAnyEventChanged))]
         public async Task Save()
         {
             var fileService = Ioc.Default.GetService<IFileService>()!;
@@ -72,7 +76,21 @@ namespace EPP.ViewModels
                 fileService.CreateFileBackup(configService.ConfigData.EventPath);
             }
 
-            await EventSavingHelper.SaveEvent(_eventFile!);
+            await EventSavingHelper.SaveEvent(EventFile!);
+        }
+
+        [RelayCommand(CanExecute = nameof(EventFile.IsAnyEventChanged))]
+        public void ResetAll()
+        {
+            foreach (var modEvent in EventFile.Events)
+            {
+                modEvent.ResetIcon((EditorViewModel)CurrentPage);
+            }
+        }
+
+        public bool IsAnyEventChanged()
+        {
+            return EventFile.IsAnyEventChanged;
         }
     }
 }

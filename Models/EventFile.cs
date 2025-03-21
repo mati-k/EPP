@@ -1,13 +1,16 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using Pdoxcl2Sharp;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 namespace EPP.Models
 {
-    public class EventFile : ObservableObject, IParadoxRead
+    public partial class EventFile : ObservableObject, IParadoxRead
     {
-        public List<ModEvent> Events { get; set; } = new();
+        public ObservableCollection<ModEvent> Events { get; set; } = new();
         public string Namespace { get; set; } = "";
+        [ObservableProperty]
+        private bool _isAnyEventChanged = false;
 
         public void TokenCallback(ParadoxParser parser, string token)
         {
@@ -37,6 +40,25 @@ namespace EPP.Models
                 {
                     option.Name = localization.GetValueForKey(option.Name);
                 }
+            }
+        }
+
+        public void TrackEventChange()
+        {
+            foreach (ModEvent modEvent in Events)
+            {
+                modEvent.PropertyChanged += OnModEventPropertyChanged;
+            }
+        }
+
+        private void OnModEventPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            var modEvent = (ModEvent)sender!;
+            bool isEventChanged = modEvent.Picture != modEvent.OriginalPicture;
+
+            if (isEventChanged != IsAnyEventChanged)
+            {
+                IsAnyEventChanged = Events.Any(modEvent => modEvent.Picture != modEvent.OriginalPicture);
             }
         }
     }
