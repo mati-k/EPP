@@ -24,6 +24,7 @@ namespace EPP.Services
         private string _eventPicturesPath = Path.Combine("gfx", "event_pictures");
         private string _interfacePath = Path.Combine("gfx", "interface");
         private string _dlcPath = "dlc";
+        private string _builtIndlcPath = "dlc";
 
         private List<string> _interfaceIcons = new List<string>() {
             "events_BG_top",
@@ -41,7 +42,8 @@ namespace EPP.Services
 
             await LoadEventPictures(Path.Combine(path, _eventPicturesPath));
             await LoadEventInterface(path);
-            await LoadDlcEventContent(path);
+            await LoadDlcEventContent(Path.Combine(path, _builtIndlcPath), true);
+            await LoadDlcEventContent(Path.Combine(path, _dlcPath), false);
         }
 
         private async Task LoadEventPictures(string path)
@@ -98,10 +100,9 @@ namespace EPP.Services
             }
         }
 
-        private async Task LoadDlcEventContent(string path)
+        private async Task LoadDlcEventContent(string path, bool isBuiltIn)
         {
             var fileService = Ioc.Default.GetService<IFileService>();
-            path = Path.Combine(path, _dlcPath);
 
             var items = await fileService!.ListFolderAsync(path);
             if (items == null)
@@ -117,7 +118,13 @@ namespace EPP.Services
                     continue;
                 }
 
-                var dlcName = await LoadDlcName(dlc_content);
+                string dlcName = "";
+                // No need to display dlc name for free dlcs
+                if (!isBuiltIn)
+                {
+                    dlcName = await LoadDlcName(dlc_content);
+                }
+
                 await LoadDlcPictures(dlc_content, dlcName);
             }
         }
@@ -289,7 +296,7 @@ namespace EPP.Services
                 return "";
             }
 
-            if (_dlcGfxFiles.ContainsKey(name))
+            if (_dlcGfxFiles.ContainsKey(name) && !string.IsNullOrEmpty(_dlcGfxFiles[name].DlcName))
             {
                 return $"{name} ({_dlcGfxFiles[name].DlcName})";
             }
