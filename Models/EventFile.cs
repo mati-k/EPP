@@ -7,7 +7,7 @@ namespace EPP.Models
 {
     public partial class EventFile : ObservableObject, IParadoxRead
     {
-        public ObservableCollection<ModEvent> Events { get; set; } = new();
+        public ObservableCollection<ModEvent> Events { get; set; } = [];
         public string Namespace { get; set; } = "";
         [ObservableProperty]
         private bool _isAnyEventChanged = false;
@@ -15,11 +15,22 @@ namespace EPP.Models
         public void TokenCallback(ParadoxParser parser, string token)
         {
             if (token.Equals("namespace"))
+            {
                 Namespace = parser.ReadString();
-            else if (token.Equals("country_event"))
-                Events.Add(parser.Parse(new ModEvent(true)));
+            }
             else
-                Events.Add(parser.Parse(new ModEvent(false)));
+            {
+                var parsedEvent = parser.Parse(new ModEvent(token.Equals("country_event")));
+
+                Events.Add(parsedEvent);
+                if (parsedEvent.Pictures.Count == 0)
+                {
+                    var picture = new EventPicture("");
+                    parsedEvent.Pictures.Add(picture);
+                    parsedEvent.SelectedPicture = picture;
+                }
+                parsedEvent.PropertyChanged += OnModEventPropertyChanged;
+            }
         }
 
         public void BindLocalization(Localization localization)
@@ -43,23 +54,20 @@ namespace EPP.Models
             }
         }
 
-        public void TrackEventChange()
-        {
-            foreach (ModEvent modEvent in Events)
-            {
-                modEvent.PropertyChanged += OnModEventPropertyChanged;
-            }
-        }
-
         private void OnModEventPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             var modEvent = (ModEvent)sender!;
-            bool isEventChanged = modEvent.Picture != modEvent.OriginalPicture;
+            bool isEventChanged = modEvent.IsChanged;
 
             if (isEventChanged != IsAnyEventChanged)
             {
-                IsAnyEventChanged = Events.Any(modEvent => modEvent.Picture != modEvent.OriginalPicture);
+                UpdateIsAnyChanged();
             }
+        }
+
+        public void UpdateIsAnyChanged()
+        {
+            IsAnyEventChanged = Events.Any(modEvent => modEvent.IsChanged);
         }
     }
 }

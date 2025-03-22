@@ -1,11 +1,13 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:EPP.ViewModels"
+             xmlns:model="using:EPP.Models"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:view="using:EPP.Views"
              xmlns:mock="using:EPP.Mock"
              x:DataType="vm:EditorViewModel"
+             xmlns:assist="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
              xmlns:converters="using:EPP.Converters"
              xmlns:avalonia_converters="using:Avalonia.Controls.Converters"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
@@ -39,7 +41,31 @@
       </ListBox.ItemTemplate>
     </ListBox>
 
-    <view:EventView DataContext="{Binding SelectedEvent}" Grid.Column="1" />
+    <StackPanel Grid.Column="1">
+      <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding SelectedEvent.HasMultiplePictures}" IsEnabled="{Binding SelectedEvent.HasMultiplePictures}" HorizontalAlignment="Left" Margin="16,0,0,0">
+        <ComboBox Theme="{StaticResource MaterialOutlineComboBox}" assist:ComboBoxAssist.Label="Current Picture" SelectedValue="{Binding SelectedPictureData, Mode=TwoWay}" ItemsSource="{Binding SelectedEventPictures}" MinWidth="300">
+          <ComboBox.ItemTemplate>
+            <DataTemplate DataType="model:EventPicture">
+              <TextBlock Text="{Binding Current}">
+                <ToolTip.Tip>
+                  <TextBlock Text="{Binding TriggerText}" />
+                </ToolTip.Tip>
+              </TextBlock>
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Panel Width="22" Height="22" Background="Transparent">
+          <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
+          <ToolTip.Tip>
+            <TextBlock>
+              This event has multiple pictures defined. Order here will match the order in file,<LineBreak/>
+              and if you hover over option, tooltip with its trigger should appear.
+            </TextBlock>
+          </ToolTip.Tip>
+        </Panel>
+      </StackPanel>
+      <view:EventView DataContext="{Binding SelectedEvent}" />
+    </StackPanel>
 
     <Grid Grid.Column="2">
       <Grid.RowDefinitions>

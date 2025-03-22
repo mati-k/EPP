@@ -44,9 +44,7 @@ namespace EPP.ViewModels
                 string fileText = File.ReadAllText(config.EventPath);
                 using (Stream fileStream = new MemoryStream(Encoding.UTF8.GetBytes(fileText ?? "")))
                 {
-                    EventFile eventFile = ParadoxParser.Parse(fileStream, new EventFile());
-                    EventFile = eventFile;
-                    eventFile.TrackEventChange();
+                    EventFile = ParadoxParser.Parse(fileStream, new EventFile());
                 }
 
                 if (!string.IsNullOrEmpty(config.LocalizationPath))
@@ -77,9 +75,10 @@ namespace EPP.ViewModels
             }
 
             await EventSavingHelper.SaveEvent(EventFile!);
+            EventFile.UpdateIsAnyChanged();
         }
 
-        [RelayCommand(CanExecute = nameof(EventFile.IsAnyEventChanged))]
+        [RelayCommand(CanExecute = nameof(IsAnyEventChanged))]
         public void ResetAll()
         {
             foreach (var modEvent in EventFile.Events)

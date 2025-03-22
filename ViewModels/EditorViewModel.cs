@@ -17,13 +17,19 @@ namespace EPP.ViewModels
 
         [ObservableProperty]
         [NotifyPropertyChangedFor("ActivePictures")]
-        private ObservableCollection<string> _pictures = new();
+        private ObservableCollection<string> _pictures = [];
 
         [ObservableProperty]
         private string _pictureQuery = "";
 
         [ObservableProperty]
         private string _selectedPicture;
+
+        [ObservableProperty]
+        private EventPicture _selectedPictureData;
+
+        [ObservableProperty]
+        private ObservableCollection<EventPicture> _selectedEventPictures = [];
 
         public ObservableCollection<string> ActivePictures
         {
@@ -35,7 +41,17 @@ namespace EPP.ViewModels
 
         partial void OnSelectedEventChanged(ModEvent value)
         {
+            SelectedEventPictures = value.Pictures;
+            SelectedPictureData = value.SelectedPicture;
             SelectedPicture = value.Picture;
+        }
+
+        partial void OnSelectedPictureDataChanged(EventPicture value)
+        {
+            if (value != null)
+            {
+                SelectedEvent.SelectedPicture = value;
+            }
         }
 
         partial void OnSelectedPictureChanged(string value)

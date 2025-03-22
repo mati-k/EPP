@@ -244,7 +244,9 @@ namespace EPP.Services
 
             string filePath = _gfxFiles[name];
             if (!File.Exists(filePath))
+            {
                 return null;
+            }
 
             try
             {

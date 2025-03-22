@@ -14,5 +14,10 @@ namespace EPP.Models
         }
 
         public override void TokenCallback(ParadoxParser parser, string token) { }
+
+        public override string ToString()
+        {
+            return Name + " = " + Value;
+        }
     }
 }

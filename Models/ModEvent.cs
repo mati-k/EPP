@@ -5,6 +5,7 @@ using EPP.Views;
 using Pdoxcl2Sharp;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 
 namespace EPP.Models
@@ -16,13 +17,13 @@ namespace EPP.Models
         public string Title { get; set; }
         public string Description { get; set; }
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsChanged))]
+        private EventPicture _selectedPicture;
+        [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ResetIconCommand))]
         private string _picture;
         [ObservableProperty]
-        [NotifyPropertyChangedFor(nameof(IsChanged))]
-        [NotifyCanExecuteChangedFor(nameof(ResetIconCommand))]
-        private string _originalPicture;
+        [NotifyPropertyChangedFor(nameof(HasMultiplePictures))]
+        private ObservableCollection<EventPicture> _pictures = [];
         public bool FireOnlyOnce { get; set; } = false;
         public bool IsTriggeredOnly { get; set; } = false;
         public bool Hidden { get; set; } = false;
@@ -35,8 +36,9 @@ namespace EPP.Models
         public GroupNode MajorTrigger { get; set; }
         public GroupNode Immediate { get; set; }
         public GroupNode After { get; set; }
-        public List<EventOption> Options { get; set; } = new();
-        public bool IsChanged { get => Picture != OriginalPicture; }
+        public List<EventOption> Options { get; set; } = [];
+        public bool IsChanged { get => Pictures.Any(picture => picture.IsChanged); }
+        public bool HasMultiplePictures { get => Pictures.Count > 1; }
 
         public ModEvent() { }
 
@@ -66,18 +68,14 @@ namespace EPP.Models
                         break;
 
                     case "picture":
-                        string picture;
-                        if (parser.NextIsBracketed())
-                            picture = (parser.Parse(new GroupNode()).Nodes.Where(n => n.Name.Equals("picture")).First() as ValueNode)!.Value;
-                        else
-                            picture = parser.ReadString();
-
-                        if (String.IsNullOrWhiteSpace(Picture))
-                            Picture = picture;
-
-                        OriginalPicture = picture;
+                        var picture = parser.NextIsBracketed() ? parser.Parse(new EventPicture()) : new EventPicture(parser.ReadString());
+                        Pictures.Add(picture);
+                        if (string.IsNullOrEmpty(Picture))
+                        {
+                            SelectedPicture = picture;
+                            Picture = picture.Current;
+                        }
                         break;
-
                     case "is_triggered_only": IsTriggeredOnly = parser.ReadBool(); break;
                     case "fire_only_once": FireOnlyOnce = parser.ReadBool(); break;
                     case "hidden": Hidden = parser.ReadBool(); break;
@@ -97,8 +95,18 @@ namespace EPP.Models
             catch (Exception e)
             {
                 string eventTypeText = IsCountryEvent ? "country_event" : "province_event";
-                throw new Exception($"Event exception, event type: {eventTypeText}, id: {Id}, issue at token: {token.ToString()}\n{e.ToString()}");
+                throw new Exception($"Event exception, event type: {eventTypeText}, id: {Id}, issue at token: {token}\n{e}");
             }
+        }
+
+        partial void OnPictureChanged(string value)
+        {
+            SelectedPicture.Current = value;
+        }
+
+        partial void OnSelectedPictureChanged(EventPicture value)
+        {
+            Picture = value.Current;
         }
 
         [RelayCommand(CanExecute = nameof(IsChanged))]
@@ -108,13 +116,22 @@ namespace EPP.Models
             ResetIcon(viewModel);
         }
 
+        public void RefreshIsChanged()
+        {
+            ResetIconCommand.NotifyCanExecuteChanged();
+        }
+
         public void ResetIcon(EditorViewModel viewModel)
         {
-            Picture = OriginalPicture;
+            foreach (var picture in Pictures)
+            {
+                picture.Reset();
+            }
 
+            Picture = SelectedPicture.Current;
             if (viewModel != null && viewModel.SelectedEvent == this)
             {
-                viewModel.SelectedPicture = OriginalPicture;
+                viewModel.SelectedPicture = Picture;
             }
         }
     }

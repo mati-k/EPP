@@ -52,7 +52,7 @@ namespace EPP.Helpers
             var balance = GetBracketBalance(fileContent);
             foreach (var modEvent in eventFile.Events)
             {
-                if (modEvent.Picture != modEvent.OriginalPicture)
+                if (modEvent.IsChanged)
                 {
                     int eventStart = GetEventStart(modEvent, fileContent, balance);
                     if (eventStart == -1)
@@ -61,8 +61,17 @@ namespace EPP.Helpers
                         return;
                     }
 
-                    ReplacePicture(modEvent, fileContent, eventStart);
-                    modEvent.OriginalPicture = modEvent.Picture;
+                    foreach (var picture in modEvent.Pictures)
+                    {
+                        if (picture.IsChanged)
+                        {
+                            bool wasSafeSuccess = await ReplacePictures(modEvent, fileContent, eventStart);
+                            if (!wasSafeSuccess)
+                            {
+                                return;
+                            }
+                        }
+                    }
                 }
             }
 
@@ -74,6 +83,15 @@ namespace EPP.Helpers
                 {
                     await streamWriter.WriteLineAsync(line);
                 }
+            }
+
+            foreach (var modEvent in eventFile.Events)
+            {
+                foreach (var picture in modEvent.Pictures)
+                {
+                    picture.Original = picture.Current;
+                }
+                modEvent.RefreshIsChanged();
             }
         }
 
@@ -130,17 +148,60 @@ namespace EPP.Helpers
             return -1;
         }
 
-        private static void ReplacePicture(ModEvent modEvent, List<string> text, int eventStart)
+        private static async Task<bool> ReplacePictures(ModEvent modEvent, List<string> text, int eventStart)
         {
+            int pictureIndex = 0;
+            EventPicture currentPicture = modEvent.Pictures[pictureIndex];
+            bool isInsidePicture = false;
+
             for (int i = eventStart + 1; i < text.Count; i++)
             {
                 string line = text[i];
-                if (line.Contains("picture"))
+
+                // Should only happen for those without any picture
+                if (string.IsNullOrEmpty(currentPicture.Original))
                 {
-                    text[i] = line.Replace(modEvent.OriginalPicture, modEvent.Picture);
-                    break;
+                    if (line.Contains("id"))
+                    {
+                        text.Insert(i + 1, "\tpicture = " + currentPicture.Current);
+                        currentPicture.Original = currentPicture.Current;
+                        return true;
+                    }
+                }
+                else if (line.Contains("picture"))
+                {
+                    if (isInsidePicture || currentPicture.IsSimplePicture)
+                    {
+                        if (!line.Contains(currentPicture.Original))
+                        {
+                            await DialogHost.Show(new InfoDialogData($"Error occured during saving pictures, pictures structure for event {modEvent.Id} did not match loaded one"), "MainDialogHost");
+                            return false;
+                        }
+
+                        text[i] = line.Replace(currentPicture.Original, currentPicture.Current);
+                        if (pictureIndex == modEvent.Pictures.Count - 1)
+                        {
+                            return true;
+                        }
+
+                        isInsidePicture = false;
+                        currentPicture = modEvent.Pictures[++pictureIndex];
+                    }
+                    else
+                    {
+                        if (!line.Contains('{'))
+                        {
+                            await DialogHost.Show(new InfoDialogData($"Error occured during saving pictures, pictures structure for event {modEvent.Id} did not match loaded one"), "MainDialogHost");
+                            return false;
+                        }
+
+                        isInsidePicture = true;
+                    }
                 }
             }
+
+            await DialogHost.Show(new InfoDialogData($"Error occured during saving pictures, pictures structure for event {modEvent.Id} did not match loaded one"), "MainDialogHost");
+            return false;
         }
     }
 }
