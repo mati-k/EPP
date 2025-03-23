@@ -50,7 +50,7 @@ namespace EPP.ViewModels
 
                 if (!string.IsNullOrEmpty(config.LocalizationPath))
                 {
-                    Localization localization = new Localization();
+                    Localization localization = new();
                     await localization.LoadFromFileAsync(config.LocalizationPath);
                     EventFile.BindLocalization(localization);
                 }
@@ -84,7 +84,7 @@ namespace EPP.ViewModels
         {
             foreach (var modEvent in EventFile.Events)
             {
-                modEvent.ResetIcon((EditorViewModel)CurrentPage);
+                modEvent.ResetIcon();
             }
         }
 

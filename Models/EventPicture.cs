@@ -38,16 +38,6 @@ namespace EPP.Models
             Current = name;
         }
 
-        partial void OnCurrentChanged(string value)
-        {
-            OnPropertyChanged(nameof(Current));
-        }
-
-        partial void OnOriginalChanged(string value)
-        {
-            OnPropertyChanged(nameof(Original));
-        }
-
         public void TokenCallback(ParadoxParser parser, string token)
         {
             if (token.Equals("picture"))

@@ -1,7 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using EPP.ViewModels;
-using EPP.Views;
 using Pdoxcl2Sharp;
 using System;
 using System.Collections.Generic;
@@ -17,10 +15,8 @@ namespace EPP.Models
         public string Title { get; set; }
         public string Description { get; set; }
         [ObservableProperty]
-        private EventPicture _selectedPicture;
-        [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ResetIconCommand))]
-        private string _picture;
+        private EventPicture _selectedPicture;
         [ObservableProperty]
         [NotifyPropertyChangedFor(nameof(HasMultiplePictures))]
         private ObservableCollection<EventPicture> _pictures = [];
@@ -70,10 +66,9 @@ namespace EPP.Models
                     case "picture":
                         var picture = parser.NextIsBracketed() ? parser.Parse(new EventPicture()) : new EventPicture(parser.ReadString());
                         Pictures.Add(picture);
-                        if (string.IsNullOrEmpty(Picture))
+                        if (SelectedPicture == null)
                         {
                             SelectedPicture = picture;
-                            Picture = picture.Current;
                         }
                         break;
                     case "is_triggered_only": IsTriggeredOnly = parser.ReadBool(); break;
@@ -99,40 +94,37 @@ namespace EPP.Models
             }
         }
 
-        partial void OnPictureChanged(string value)
-        {
-            SelectedPicture.Current = value;
-        }
-
-        partial void OnSelectedPictureChanged(EventPicture value)
-        {
-            Picture = value.Current;
-        }
-
         [RelayCommand(CanExecute = nameof(IsChanged))]
-        public void ResetIcon(EditorView editorView)
-        {
-            EditorViewModel viewModel = (EditorViewModel)editorView.DataContext!;
-            ResetIcon(viewModel);
-        }
-
-        public void RefreshIsChanged()
-        {
-            ResetIconCommand.NotifyCanExecuteChanged();
-        }
-
-        public void ResetIcon(EditorViewModel viewModel)
+        public void ResetIcon()
         {
             foreach (var picture in Pictures)
             {
                 picture.Reset();
             }
+        }
 
-            Picture = SelectedPicture.Current;
-            if (viewModel != null && viewModel.SelectedEvent == this)
+        partial void OnSelectedPictureChanged(EventPicture? oldValue, EventPicture newValue)
+        {
+            if (oldValue != null)
             {
-                viewModel.SelectedPicture = Picture;
+                oldValue.PropertyChanged -= OnSelectedPicturePropertyChanged;
             }
+
+            if (newValue != null)
+            {
+                newValue.PropertyChanged += OnSelectedPicturePropertyChanged;
+            }
+        }
+
+        private void OnSelectedPicturePropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            OnPropertyChanged(nameof(SelectedPicture));
+            ResetIconCommand.NotifyCanExecuteChanged();
+        }
+
+        public void RefreshIsChanged()
+        {
+            ResetIconCommand.NotifyCanExecuteChanged();
         }
     }
 }

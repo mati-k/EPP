@@ -12,9 +12,9 @@ namespace EPP.Converters
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
-            if (Int32.TryParse((string)parameter, out int count))
+            if (Int32.TryParse((string)parameter!, out int count))
             {
-                return ((IEnumerable<object>)value).Take(count);
+                return ((IEnumerable<object>)value!).Take(count);
             }
 
             return value;

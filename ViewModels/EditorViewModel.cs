@@ -22,15 +22,6 @@ namespace EPP.ViewModels
         [ObservableProperty]
         private string _pictureQuery = "";
 
-        [ObservableProperty]
-        private string _selectedPicture;
-
-        [ObservableProperty]
-        private EventPicture _selectedPictureData;
-
-        [ObservableProperty]
-        private ObservableCollection<EventPicture> _selectedEventPictures = [];
-
         public ObservableCollection<string> ActivePictures
         {
             get
@@ -39,37 +30,50 @@ namespace EPP.ViewModels
             }
         }
 
-        partial void OnSelectedEventChanged(ModEvent value)
+        partial void OnSelectedEventChanged(ModEvent? oldValue, ModEvent newValue)
         {
-            SelectedEventPictures = value.Pictures;
-            SelectedPictureData = value.SelectedPicture;
-            SelectedPicture = value.Picture;
-        }
-
-        partial void OnSelectedPictureDataChanged(EventPicture value)
-        {
-            if (value != null)
+            if (oldValue == newValue)
             {
-                SelectedEvent.SelectedPicture = value;
+                return;
+            }
+
+            if (oldValue != null)
+            {
+                oldValue.PropertyChanged -= OnSelectedEventPropertyChanged;
+            }
+
+            if (newValue != null)
+            {
+                newValue.PropertyChanged += OnSelectedEventPropertyChanged;
+
+                // Force refresh on combobox to start with initial value
+                if (newValue.HasMultiplePictures)
+                {
+                    ForceRefreshSelectedEventPicture(newValue);
+                }
             }
         }
 
-        partial void OnSelectedPictureChanged(string value)
+        private void OnSelectedEventPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
-            if (value != null)
-            {
-                SelectedEvent.Picture = value;
-            }
+            OnPropertyChanged(nameof(SelectedEvent));
         }
 
         // Manualy update to restore selection if picture reappears
         partial void OnPictureQueryChanged(string value)
         {
             this.OnPropertyChanged(nameof(ActivePictures));
-            if (SelectedPicture == null && ActivePictures.Contains(SelectedEvent.Picture))
+            if (SelectedEvent != null && ActivePictures.Contains(SelectedEvent.SelectedPicture.Current))
             {
-                SelectedPicture = SelectedEvent.Picture;
+                ForceRefreshSelectedEventPicture(SelectedEvent);
             }
+        }
+
+        private void ForceRefreshSelectedEventPicture(ModEvent modEvent)
+        {
+            var tmp = modEvent.SelectedPicture;
+            modEvent.SelectedPicture = null!;
+            modEvent.SelectedPicture = tmp;
         }
 
         public EditorViewModel() { }

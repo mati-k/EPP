@@ -16,6 +16,9 @@
   <Design.DataContext>
     <mock:MockEditorViewModel />
   </Design.DataContext>
+  <UserControl.Resources>
+    <converters:PreventNull x:Key="PreventNull"/>
+  </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="250"/>
@@ -32,7 +35,7 @@
               <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBlock Text="{Binding Title}" TextAlignment="Left" Grid.Column="0"/>
-            <Button Content="{materialIcons:MaterialIconExt Kind=Restart, Size=16}" Command="{Binding ResetIconCommand}" CommandParameter="{Binding $parent[view:EditorView]}" Grid.Column="1" Padding="2" Margin="0,0,16,0"/>
+            <Button Content="{materialIcons:MaterialIconExt Kind=Restart, Size=16}" Command="{Binding ResetIconCommand}" Grid.Column="1" Padding="2" Margin="0,0,16,0"/>
           </Grid>
         </DataTemplate>
       </ListBox.ItemTemplate>
@@ -40,7 +43,7 @@
 
     <StackPanel Grid.Column="1">
       <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding SelectedEvent.HasMultiplePictures}" IsEnabled="{Binding SelectedEvent.HasMultiplePictures}" HorizontalAlignment="Left" Margin="16,0,0,0">
-        <ComboBox Theme="{StaticResource MaterialOutlineComboBox}" assist:ComboBoxAssist.Label="Current Picture" SelectedValue="{Binding SelectedPictureData, Mode=TwoWay}" ItemsSource="{Binding SelectedEventPictures}" MinWidth="300">
+        <ComboBox Theme="{StaticResource MaterialOutlineComboBox}" assist:ComboBoxAssist.Label="Current Picture" SelectedValue="{Binding SelectedEvent.SelectedPicture, Mode=TwoWay, Converter={StaticResource PreventNull}}" ItemsSource="{Binding SelectedEvent.Pictures}" MinWidth="300">
           <ComboBox.ItemTemplate>
             <DataTemplate DataType="model:EventPicture">
               <TextBlock Text="{Binding Current}">
@@ -70,7 +73,7 @@
         <RowDefinition Height="*"/>
       </Grid.RowDefinitions>
       <TextBox Text="{Binding PictureQuery}" Width="512" Watermark="Filter pictures..." Grid.Row="0" Margin="0,0,0,10"/>
-      <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedPicture, Mode=TwoWay}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
+      <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedEvent.SelectedPicture.Current, Mode=TwoWay, Converter={StaticResource PreventNull}}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
         <ListBox.ItemTemplate>
           <DataTemplate>
             <StackPanel>

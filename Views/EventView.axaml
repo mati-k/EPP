@@ -23,7 +23,7 @@
         <ImageBrush Source="{Binding Source={x:Static model:GfxConsts.BackgroundMiddle}, Converter={x:Static converters:DDSConverter.LoadDDS}}" DestinationRect="0,0,656,58" TileMode="Tile" />
       </Rectangle.Fill>
     </Rectangle>
-    <Image Source="{Binding Picture, Converter={x:Static converters:DDSConverter.LoadDDS}}" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="30" Canvas.Top="81" />
+    <Image Source="{Binding SelectedPicture.Current, Converter={x:Static converters:DDSConverter.LoadDDS}}" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="30" Canvas.Top="81" />
     <Image Source="{Binding Source={x:Static model:GfxConsts.BackgroundBottom}, Converter={x:Static converters:DDSConverter.LoadDDS}}" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="-43" Canvas.Top="523" />
     <view:RichTextBlock RichText="{Binding Description}" VerticalAlignment="Top" HorizontalAlignment="Center" Width="512" MaxHeight="300" FontSize="13" FontWeight="DemiBold" TextAlignment="Left" Canvas.Left="31" Canvas.Top="230" xml:space="preserve" TextWrapping="Wrap" />
     
