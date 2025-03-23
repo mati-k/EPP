@@ -3,6 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:model="using:EPP.Models" xmlns:vm="using:EPP.ViewModels"
+             xmlns:view="using:EPP.Views"
              xmlns:converters="using:EPP.Converters"
              mc:Ignorable="d" d:DesignWidth="650" d:DesignHeight="700"
              x:Class="EPP.Views.EventView"
@@ -24,14 +25,14 @@
     </Rectangle>
     <Image Source="{Binding Picture, Converter={x:Static converters:DDSConverter.LoadDDS}}" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="30" Canvas.Top="81" />
     <Image Source="{Binding Source={x:Static model:GfxConsts.BackgroundBottom}, Converter={x:Static converters:DDSConverter.LoadDDS}}" HorizontalAlignment="Left" VerticalAlignment="Top" Canvas.Left="-43" Canvas.Top="523" />
-    <TextBlock Text="{Binding Description}" VerticalAlignment="Top" HorizontalAlignment="Center" Width="512" MaxHeight="300" FontSize="13" FontWeight="DemiBold" TextAlignment="Left" Canvas.Left="31" Canvas.Top="230" xml:space="preserve" TextWrapping="Wrap" />
-
+    <view:RichTextBlock RichText="{Binding Description}" VerticalAlignment="Top" HorizontalAlignment="Center" Width="512" MaxHeight="300" FontSize="13" FontWeight="DemiBold" TextAlignment="Left" Canvas.Left="31" Canvas.Top="230" xml:space="preserve" TextWrapping="Wrap" />
+    
     <ItemsControl ItemsSource="{Binding Options, Converter={StaticResource SizeLimiter}, ConverterParameter=3}" VerticalAlignment="Top" HorizontalAlignment="Center" Canvas.Top="570" Canvas.Left="12">
       <ItemsControl.ItemTemplate>
         <DataTemplate>
           <Grid HorizontalAlignment="Center" VerticalAlignment="Center">
             <Image Source="{Binding Source={x:Static model:GfxConsts.EventOption}, Converter={x:Static converters:DDSConverter.LoadDDS}}"/>
-            <TextBlock Text="{Binding Name}" Foreground="White" FontSize="12" HorizontalAlignment="Center" Padding="10"/>
+            <view:RichTextBlock RichText="{Binding Name}" Foreground="White" FontSize="12" HorizontalAlignment="Center" Padding="10"/>
           </Grid>
         </DataTemplate>
       </ItemsControl.ItemTemplate>

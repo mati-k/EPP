@@ -11,7 +11,7 @@ namespace EPP.Services
 
         public void AddFontColor(char key, List<string> rgb)
         {
-            if (_colors.ContainsKey(key))
+            if (!_colors.ContainsKey(key))
             {
                 _colors[key] = new SolidColorBrush(Color.FromRgb((byte)Int32.Parse(rgb[0]), (byte)Int32.Parse(rgb[1]), (byte)Int32.Parse(rgb[2])));
             }
