@@ -26,6 +26,12 @@ namespace EPP.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _sourceDirectories = new();
 
+        [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(MoveUpCommand))]
+        [NotifyCanExecuteChangedFor(nameof(MoveDownCommand))]
+        [NotifyCanExecuteChangedFor(nameof(RemoveDirectoryCommand))]
+        private int _selectedDirectoryIndex = 0;
+
         private Action<ConfigData>? _onContinue;
 
         public ConfigurationViewModel()
@@ -80,6 +86,62 @@ namespace EPP.ViewModels
             SourceDirectories = new ObservableCollection<string>(config.SourceDirectories);
 
             StartCommand.NotifyCanExecuteChanged();
+        }
+
+        [RelayCommand(CanExecute = nameof(CanMoveUp))]
+        public void MoveUp()
+        {
+            if (SelectedDirectoryIndex > 0)
+            {
+                // SelectedDirectoryIndex might get automaticaly changed to -1 during list changing
+                int index = SelectedDirectoryIndex;
+
+                string temp = SourceDirectories[index - 1];
+                SourceDirectories[index - 1] = SourceDirectories[index];
+                SourceDirectories[index] = temp;
+
+                SelectedDirectoryIndex = index - 1;
+            }
+        }
+
+        public bool CanMoveUp()
+        {
+            return SelectedDirectoryIndex > 0;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanMoveDown))]
+        public void MoveDown()
+        {
+            if (CanMoveDown())
+            {
+                // SelectedDirectoryIndex might get automaticaly changed to -1 during list changing
+                int index = SelectedDirectoryIndex;
+
+                string temp = SourceDirectories[index + 1];
+                SourceDirectories[index + 1] = SourceDirectories[index];
+                SourceDirectories[index] = temp;
+
+                SelectedDirectoryIndex = index + 1;
+            }
+        }
+
+        public bool CanMoveDown()
+        {
+            return SelectedDirectoryIndex > -1 && SelectedDirectoryIndex < SourceDirectories.Count - 1;
+        }
+
+        [RelayCommand]
+        public void RemoveDirectory()
+        {
+            if (SelectedDirectoryIndex > -1)
+            {
+                SourceDirectories.RemoveAt(SelectedDirectoryIndex);
+            }
+        }
+
+        public bool CanRemoveDirectory()
+        {
+            return SelectedDirectoryIndex > -1;
         }
     }
 }

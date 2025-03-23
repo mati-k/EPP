@@ -17,85 +17,92 @@
       <RowDefinition Height="*"/>
       <RowDefinition Height="Auto"/>
     </Grid.RowDefinitions>
-    <StackPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" Margin="24" Grid.Row="0" Spacing="12">
-      <controls:Card Padding="16">
-        <StackPanel Spacing="6">
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBlock Text="Event File" Classes="Headline6"/>
-            <Panel Width="22" Height="22" Background="Transparent">
-              <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
-              <ToolTip.Tip>
-                <TextBlock Text="The .txt file with your events"/>
-              </ToolTip.Tip>
-            </Panel>
+    <ScrollViewer VerticalScrollBarVisibility="Visible" Grid.Row="0">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Stretch" Margin="24" Spacing="12">
+        <controls:Card Padding="16">
+          <StackPanel Spacing="6">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="Event File" Classes="Headline6"/>
+              <Panel Width="22" Height="22" Background="Transparent">
+                <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
+                <ToolTip.Tip>
+                  <TextBlock Text="The .txt file with your events"/>
+                </ToolTip.Tip>
+              </Panel>
+            </StackPanel>
+            <Button Content="Pick file" Click="EventFile_Click" Width="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="{Binding EventPath}" Classes="Body2" />
           </StackPanel>
-          <Button Content="Pick file" Click="EventFile_Click" Width="250" HorizontalAlignment="Left"/>
-          <TextBlock Text="{Binding EventPath}" Classes="Body2" />
-        </StackPanel>
-      </controls:Card>
+        </controls:Card>
 
-      <controls:Card Padding="16">
-        <StackPanel Spacing="6">
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBlock Text="Localization File (Optional)" Classes="Headline6"/>
-            <Panel Width="22" Height="22" Background="Transparent">
-              <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
-              <ToolTip.Tip>
-                <TextBlock Text="The .yml file with your events. You can add it to display proper text in event previews"/>
-              </ToolTip.Tip>
-            </Panel>
+        <controls:Card Padding="16">
+          <StackPanel Spacing="6">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="Localization File (Optional)" Classes="Headline6"/>
+              <Panel Width="22" Height="22" Background="Transparent">
+                <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
+                <ToolTip.Tip>
+                  <TextBlock Text="The .yml file with your events. You can add it to display proper text in event previews"/>
+                </ToolTip.Tip>
+              </Panel>
+            </StackPanel>
+            <Button Content="Pick File" Click="LocalizationFile_Click" Width="250" HorizontalAlignment="Left"/>
+            <TextBlock Text="{Binding LocalizationPath}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
           </StackPanel>
-          <Button Content="Pick File" Click="LocalizationFile_Click" Width="250" HorizontalAlignment="Left"/>
-          <TextBlock Text="{Binding LocalizationPath}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        </StackPanel>
-      </controls:Card>
+        </controls:Card>
 
-      <controls:Card Padding="16">
-        <StackPanel Spacing="6">
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <TextBlock Text="Source directories" Classes="Headline6"/>
-            <Panel Width="22" Height="22" Background="Transparent">
-              <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
-              <ToolTip.Tip>
-                <TextBlock>
-                  Folders from which to pick event pictures and layout images. Order matters, with the lower folders taking precedence<LineBreak/>
-                  in case of pictures appearing in multiple (i.e. mod overwriting base game ones)<LineBreak/>
-                  <LineBreak/>
-                  Usually you want list similiar to this:<LineBreak/>
-                  - G:\Steam\steamapps\common\Europa Universalis IV<LineBreak/>
-                  - C:\Users\YourName\Documents\Paradox Interactive\Europa Universalis IV\mod\YourMod
-                </TextBlock>
-              </ToolTip.Tip>
-            </Panel>
+        <controls:Card Padding="16">
+          <StackPanel Spacing="6">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <TextBlock Text="Source directories" Classes="Headline6"/>
+              <Panel Width="22" Height="22" Background="Transparent">
+                <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
+                <ToolTip.Tip>
+                  <TextBlock>
+                    Folders from which to pick event pictures and layout images. Order matters, with the lower folders taking precedence<LineBreak/>
+                    in case of pictures appearing in multiple (i.e. mod overwriting base game ones)<LineBreak/>
+                    <LineBreak/>
+                    Usually you want list similiar to this:<LineBreak/>
+                    - G:\Steam\steamapps\common\Europa Universalis IV<LineBreak/>
+                    - C:\Users\YourName\Documents\Paradox Interactive\Europa Universalis IV\mod\YourMod
+                  </TextBlock>
+                </ToolTip.Tip>
+              </Panel>
+            </StackPanel>
+            <Button Content="Add folder" Click="SourceDirectories_Click" Width="250" HorizontalAlignment="Left"/>
+            <StackPanel Orientation="Horizontal">
+              <StackPanel Spacing="4">
+                <Button Content="{materialIcons:MaterialIconExt Kind=ArrowUp, Size=22}" Padding="4" Command="{Binding MoveUpCommand}"/>
+                <Button Content="{materialIcons:MaterialIconExt Kind=ArrowDown, Size=22}" Padding="4" Command="{Binding MoveDownCommand}"/>
+                <Button Content="{materialIcons:MaterialIconExt Kind=TrashCan, Size=22}" Padding="4" Command="{Binding RemoveDirectoryCommand}" Margin="0,32,0,0"/>
+              </StackPanel>
+              <ListBox ItemsSource="{Binding SourceDirectories}" SelectedIndex="{Binding SelectedDirectoryIndex}">
+                <ListBox.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding}"/>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+            </StackPanel>
           </StackPanel>
-          <Button Content="Add folder" Click="SourceDirectories_Click" Width="250" HorizontalAlignment="Left"/>
-          <ListBox ItemsSource="{Binding SourceDirectories}">
-            <ListBox.ItemTemplate>
-              <DataTemplate>
-                <TextBlock Text="{Binding}"/>
-              </DataTemplate>
-            </ListBox.ItemTemplate>
-          </ListBox>
-        </StackPanel>
-      </controls:Card>
+        </controls:Card>
 
-      <controls:Card Padding="16">
-        <StackPanel Spacing="6">
-          <TextBlock Text="Other settings" Classes="Headline6"/>
-
-          <StackPanel Orientation="Horizontal" Spacing="8">
-            <CheckBox Content="Use backups" IsChecked="{Binding UseBackups}"/>
-            <Panel Width="22" Height="22" Background="Transparent">
-              <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
-              <ToolTip.Tip>
-                <TextBlock Text="If enabled, before each save a copy of your current event file will be made into backups folder here"/>
-              </ToolTip.Tip>
-            </Panel>
+        <controls:Card Padding="16">
+          <StackPanel Spacing="6">
+            <TextBlock Text="Other settings" Classes="Headline6"/>
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <CheckBox Content="Use backups" IsChecked="{Binding UseBackups}"/>
+              <Panel Width="22" Height="22" Background="Transparent">
+                <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
+                <ToolTip.Tip>
+                  <TextBlock Text="If enabled, before each save a copy of your current event file will be made inside backups folder here"/>
+                </ToolTip.Tip>
+              </Panel>
+            </StackPanel>
           </StackPanel>
-        </StackPanel>
-      </controls:Card>
-
-    </StackPanel >
-    <Button Content="Continue" Command="{Binding StartCommand}" HorizontalAlignment="Center" Grid.Row="0" VerticalAlignment="Bottom" Padding="24,12" Margin="24"/>
+        </controls:Card>
+      </StackPanel >
+    </ScrollViewer>
+    <Button Content="Continue" Command="{Binding StartCommand}" HorizontalAlignment="Center" Grid.Row="1" VerticalAlignment="Bottom" Padding="24,12" Margin="24"/>
   </Grid>
 </UserControl>

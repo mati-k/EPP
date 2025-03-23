@@ -62,7 +62,7 @@ namespace EPP.Services
 
             using (var fs = File.Create(_filePath))
             {
-                await JsonSerializer.SerializeAsync(fs, config);
+                await JsonSerializer.SerializeAsync(fs, config, new JsonSerializerOptions { WriteIndented = true });
             }
 
             ConfigData = config;

@@ -16,9 +16,6 @@
   <Design.DataContext>
     <mock:MockEditorViewModel />
   </Design.DataContext>
-  <UserControl.Resources>
-    <avalonia_converters:DoNothingForNullConverter x:Key="DoNothingForNullConverter"/>
-  </UserControl.Resources>
   <Grid>
     <Grid.ColumnDefinitions>
       <ColumnDefinition Width="250"/>
