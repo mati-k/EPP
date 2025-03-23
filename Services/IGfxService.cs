@@ -7,6 +7,7 @@ namespace EPP.Services
     public interface IGfxService
     {
         public Task LoadSourceDirectory(string? path);
+        public void GeneratePaths();
         public Bitmap? GetPicture(string? name);
         public string? GetNameWithDlcText(string? name);
         public List<string> GetPictureNames();

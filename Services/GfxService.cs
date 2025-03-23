@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.DependencyInjection;
 using EPP.Helpers;
 using EPP.Models;
 using Pfim;
+using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -15,24 +16,29 @@ using System.Threading.Tasks;
 
 namespace EPP.Services
 {
-    // todo: read interface .gfx for extra name mappings
+    // todo: also load .gfx from dlc
     // todo: handle picture variants (e.g. ANGRY_MOB_eventPicture, northamericagfx_ANGRY_MOB_eventPicture, east_slavic_ANGRY_MOB_eventPicture, etc.)
     public class GfxService : IGfxService
     {
-        private Dictionary<string, string> _gfxFiles = new();
-        private Dictionary<string, DlcPicture> _dlcGfxFiles = new();
+        private readonly Dictionary<string, string> _gfxFiles = [];
+        private readonly Dictionary<string, DlcPicture> _dlcGfxFiles = [];
 
-        private string _eventPicturesPath = Path.Combine("gfx", "event_pictures");
-        private string _interfacePath = Path.Combine("gfx", "interface");
-        private string _dlcPath = "dlc";
-        private string _builtIndlcPath = "dlc";
+        private readonly Dictionary<string, string> _picturePaths = [];
+        private readonly Dictionary<string, DlcPicture> _dlcPictures = [];
 
-        private List<string> _interfaceIcons = new() {
+        private readonly string _eventPicturesPath = Path.Combine("gfx", "event_pictures");
+        private readonly string _interfacePath = Path.Combine("gfx", "interface");
+        private readonly string _dlcPath = "dlc";
+        private readonly string _builtIndlcPath = "builtin_dlc";
+
+        private readonly List<string> _interfaceIcons = [
             "events_BG_top",
             "events_BG_middle",
             "events_BG_bottom_M",
             "event_button_547"
-        };
+        ];
+
+        private readonly GfxDefinitionLoader _gfxDefinitionLoader = new();
 
         public async Task LoadSourceDirectory(string? path)
         {
@@ -41,14 +47,14 @@ namespace EPP.Services
                 return;
             }
 
-            await new GfxDefinitionLoader().Load(path);
-            await LoadEventPictures(Path.Combine(path, _eventPicturesPath));
+            await _gfxDefinitionLoader.Load(path);
+            await LoadEventPictures(Path.Combine(path, _eventPicturesPath), _eventPicturesPath);
             await LoadEventInterface(path);
             await LoadDlcEventContent(Path.Combine(path, _builtIndlcPath), true);
             await LoadDlcEventContent(Path.Combine(path, _dlcPath), false);
         }
 
-        private async Task LoadEventPictures(string path)
+        private async Task LoadEventPictures(string path, string localPath)
         {
             var fileService = Ioc.Default.GetService<IFileService>();
 
@@ -62,19 +68,19 @@ namespace EPP.Services
             {
                 if (item is IStorageFolder)
                 {
-                    await LoadEventPictures(item.TryGetLocalPath()!);
+                    await LoadEventPictures(item.TryGetLocalPath()!, Path.Combine(localPath, item.Name));
                 }
 
                 else
                 {
-                    string nameWithoutExtension = Path.GetFileNameWithoutExtension(item.Name);
+                    string relativeFilePath = GfxDefinitionLoader.TransformPathToCommonFormat(Path.Combine(localPath, item.Name));
 
-                    if (Path.GetExtension(item.Name) != ".dds" || _gfxFiles.ContainsKey(nameWithoutExtension))
+                    if (Path.GetExtension(item.Name) != ".dds" || _gfxFiles.ContainsKey(relativeFilePath))
                     {
                         continue;
                     }
 
-                    _gfxFiles.Add(nameWithoutExtension, item.TryGetLocalPath()!);
+                    _gfxFiles.Add(relativeFilePath, item.TryGetLocalPath()!);
                 }
             }
         }
@@ -94,9 +100,9 @@ namespace EPP.Services
             {
                 foreach (string interfaceIcon in _interfaceIcons)
                 {
-                    if (Path.GetFileNameWithoutExtension(item.Name) == interfaceIcon && !_gfxFiles.ContainsKey(interfaceIcon))
+                    if (Path.GetFileNameWithoutExtension(item.Name) == interfaceIcon && !_picturePaths.ContainsKey(interfaceIcon))
                     {
-                        _gfxFiles.Add(interfaceIcon, item.TryGetLocalPath()!);
+                        _picturePaths.Add(interfaceIcon, item.TryGetLocalPath()!);
                     }
                 }
             }
@@ -127,11 +133,11 @@ namespace EPP.Services
                     dlcName = await LoadDlcName(dlc_content);
                 }
 
-                await LoadDlcPictures(dlc_content, dlcName);
+                await LoadDlcZipData(dlc_content, dlcName);
             }
         }
 
-        private async Task<string> LoadDlcName(IAsyncEnumerable<IStorageItem> dlcFiles)
+        private static async Task<string> LoadDlcName(IAsyncEnumerable<IStorageItem> dlcFiles)
         {
             await foreach (var file in dlcFiles)
             {
@@ -161,7 +167,7 @@ namespace EPP.Services
             return "";
         }
 
-        private async Task LoadDlcPictures(IAsyncEnumerable<IStorageItem> dlcFiles, string dlcName)
+        private async Task LoadDlcZipData(IAsyncEnumerable<IStorageItem> dlcFiles, string dlcName)
         {
             await foreach (var file in dlcFiles)
             {
@@ -180,45 +186,58 @@ namespace EPP.Services
                     {
                         if (entry.FullName.EndsWith(".dds") && entry.FullName.Contains("event_pictures"))
                         {
-                            using (var stream = entry.Open())
-                            {
-                                var picture = LoadZipPicture(stream);
-                                if (picture != null)
-                                {
-                                    var name = Path.GetFileNameWithoutExtension(entry.Name);
+                            LoadDlcPictures(entry, dlcName);
+                        }
 
-                                    if (!_dlcGfxFiles.ContainsKey(name) && !_gfxFiles.ContainsKey(name))
-                                    {
-                                        _dlcGfxFiles.Add(name, new DlcPicture(picture, dlcName));
-                                    }
-                                }
-                            }
+                        else if (entry.FullName.EndsWith(".gfx"))
+                        {
+                            LoadDlcGfxData(entry);
                         }
                     }
                 }
             }
         }
 
-        private Bitmap? LoadZipPicture(Stream stream)
+        private void LoadDlcGfxData(ZipArchiveEntry entry)
+        {
+            using var stream = entry.Open();
+            _gfxDefinitionLoader.LoadFileContent(stream, entry.Name);
+        }
+
+        private void LoadDlcPictures(ZipArchiveEntry entry, string dlcName)
+        {
+            using var stream = entry.Open();
+            var picture = LoadZipPicture(stream);
+            if (picture != null)
+            {
+                string formattedPath = GfxDefinitionLoader.TransformPathToCommonFormat(entry.FullName);
+                if (!_dlcGfxFiles.ContainsKey(formattedPath) && !_gfxFiles.ContainsKey(entry.FullName))
+                {
+                    _dlcGfxFiles.Add(formattedPath, new DlcPicture(picture, dlcName));
+                }
+            }
+        }
+
+        private static Bitmap? LoadZipPicture(Stream stream)
         {
             try
             {
-                using (var image = Pfimage.FromStream(stream))
+                using var image = Pfimage.FromStream(stream);
+                try
                 {
-                    try
-                    {
-                        var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
-                        return new Bitmap(PixelFormat(image), AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
-                    }
+                    var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
+                    return new Bitmap(PixelFormat(image), AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
+                }
 
-                    catch (Exception e)
-                    {
-                        return null;
-                    }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Error while loading picture from dlc zip");
+                    return null;
                 }
             }
             catch (Exception e)
             {
+                Log.Error(e, "Error while loading picture from dlc zip");
                 return null;
             }
         }
@@ -230,17 +249,16 @@ namespace EPP.Services
                 return null;
             }
 
-            if (_dlcGfxFiles.ContainsKey(name))
+            if (_dlcPictures.TryGetValue(name, out DlcPicture? value))
             {
-                return _dlcGfxFiles[name].Picture;
+                return value.Picture;
             }
 
-            if (!_gfxFiles.ContainsKey(name))
+            if (!_picturePaths.TryGetValue(name, out string? filePath))
             {
                 return null;
             }
 
-            string filePath = _gfxFiles[name];
             if (!File.Exists(filePath))
             {
                 return null;
@@ -248,45 +266,60 @@ namespace EPP.Services
 
             try
             {
-                using (var image = Pfimage.FromFile(filePath))
+                using var image = Pfimage.FromFile(filePath);
+                try
                 {
-                    try
-                    {
-                        var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
-                        return new Bitmap(PixelFormat(image), AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
-                    }
+                    var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
+                    return new Bitmap(PixelFormat(image), AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
+                }
 
-                    catch (Exception e)
-                    {
-                        return null;
-                    }
+                catch (Exception e)
+                {
+                    Log.Error(e, $"Error while loading picture {name}");
+                    return null;
                 }
             }
             catch (Exception e)
             {
+                Log.Error(e, $"Error while loading picture {name}");
                 return null;
             }
         }
 
+        public void GeneratePaths()
+        {
+            foreach (var pathDefinition in _gfxDefinitionLoader.PicturePathDefinitions)
+            {
+                if (_gfxFiles.TryGetValue(pathDefinition.TextureFile, out string? path))
+                {
+                    _picturePaths[pathDefinition.Name] = path;
+                }
+                else if (_dlcGfxFiles.TryGetValue(pathDefinition.TextureFile, out DlcPicture? picture))
+                {
+                    _dlcPictures[pathDefinition.Name] = picture;
+                }
+                else
+                {
+                    Log.Error($"Event picture defintion {pathDefinition.Name} did not have corresponding image for defined path {pathDefinition.TextureFile}");
+                }
+            }
+
+            _gfxFiles.Clear();
+            _dlcGfxFiles.Clear();
+        }
+
         private static PixelFormat PixelFormat(IImage image)
         {
-            switch (image.Format)
+            return image.Format switch
             {
-                case ImageFormat.Rgb24:
-                    return PixelFormats.Bgr24;
-                case ImageFormat.Rgba32:
-                    return PixelFormats.Bgra8888;
-                case ImageFormat.Rgb8:
-                    return PixelFormats.Gray8;
-                case ImageFormat.R5g5b5a1:
-                    return PixelFormats.Bgr555;
-                case ImageFormat.R5g5b5:
-                    return PixelFormats.Bgr555;
-                case ImageFormat.R5g6b5:
-                    return PixelFormats.Bgr565;
-                default:
-                    throw new Exception($"Unable to convert {image.Format} to WPF PixelFormat");
-            }
+                ImageFormat.Rgb24 => PixelFormats.Bgr24,
+                ImageFormat.Rgba32 => PixelFormats.Bgra8888,
+                ImageFormat.Rgb8 => PixelFormats.Gray8,
+                ImageFormat.R5g5b5a1 => PixelFormats.Bgr555,
+                ImageFormat.R5g5b5 => PixelFormats.Bgr555,
+                ImageFormat.R5g6b5 => PixelFormats.Bgr565,
+                _ => throw new Exception($"Unable to convert {image.Format} to Avalonia PixelFormat"),
+            };
         }
 
         public string? GetNameWithDlcText(string? name)
@@ -296,9 +329,9 @@ namespace EPP.Services
                 return "";
             }
 
-            if (_dlcGfxFiles.ContainsKey(name) && !string.IsNullOrEmpty(_dlcGfxFiles[name].DlcName))
+            if (_dlcPictures.TryGetValue(name, out DlcPicture? picture) && !string.IsNullOrEmpty(picture.DlcName))
             {
-                return $"{name} ({_dlcGfxFiles[name].DlcName})";
+                return $"{name} ({picture.DlcName})";
             }
 
             return name;
@@ -306,8 +339,8 @@ namespace EPP.Services
 
         public List<string> GetPictureNames()
         {
-            return _gfxFiles.Keys.Where(key => key.Contains("eventPicture"))
-                .Concat(_dlcGfxFiles.Keys.Where(key => key.Contains("eventPicture")))
+            return _picturePaths.Keys.Where(key => key.Contains("eventPicture"))
+                .Concat(_dlcPictures.Keys.Where(key => key.Contains("eventPicture")))
                 .ToList();
         }
     }

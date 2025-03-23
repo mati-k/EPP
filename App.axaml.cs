@@ -18,16 +18,14 @@ namespace EPP
             AvaloniaXamlLoader.Load(this);
         }
 
-        public async override void OnFrameworkInitializationCompleted()
+        public override void OnFrameworkInitializationCompleted()
         {
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
-                IConfigService configService = await ConfigService.LoadAndInitializeConfig();
-
                 var services = new ServiceCollection();
                 services.AddSingleton<IFileService>(x => new FileService(desktop));
                 services.AddSingleton<IGfxService, GfxService>();
-                services.AddSingleton<IConfigService>(configService);
+                services.AddSingleton<IConfigService, ConfigService>();
                 services.AddSingleton<IFontService, FontService>();
                 Ioc.Default.ConfigureServices(services.BuildServiceProvider());
 

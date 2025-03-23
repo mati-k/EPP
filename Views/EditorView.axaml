@@ -75,7 +75,7 @@
           <DataTemplate>
             <StackPanel>
               <TextBlock Text="{Binding Converter={x:Static converters:DDSConverter.AddDlcText}}" FontSize="12" TextAlignment="Center"/>
-              <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}"/>  
+              <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}" MaxHeight="132"/>  
             </StackPanel>
           </DataTemplate>
         </ListBox.ItemTemplate>

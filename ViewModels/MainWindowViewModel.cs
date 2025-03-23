@@ -38,6 +38,7 @@ namespace EPP.ViewModels
             {
                 await gfxService.LoadSourceDirectory(config.SourceDirectories[i]);
             }
+            gfxService.GeneratePaths();
 
             try
             {
