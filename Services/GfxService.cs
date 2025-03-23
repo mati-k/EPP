@@ -2,6 +2,7 @@
 using Avalonia.Platform;
 using Avalonia.Platform.Storage;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using EPP.Helpers;
 using EPP.Models;
 using Pfim;
 using System;
@@ -26,7 +27,7 @@ namespace EPP.Services
         private string _dlcPath = "dlc";
         private string _builtIndlcPath = "dlc";
 
-        private List<string> _interfaceIcons = new List<string>() {
+        private List<string> _interfaceIcons = new() {
             "events_BG_top",
             "events_BG_middle",
             "events_BG_bottom_M",
@@ -40,6 +41,7 @@ namespace EPP.Services
                 return;
             }
 
+            await new GfxDefinitionLoader().Load(path);
             await LoadEventPictures(Path.Combine(path, _eventPicturesPath));
             await LoadEventInterface(path);
             await LoadDlcEventContent(Path.Combine(path, _builtIndlcPath), true);
@@ -143,16 +145,14 @@ namespace EPP.Services
                         return "";
                     }
 
-                    await using (var stream = await dlcFile.OpenReadAsync())
+                    await using var stream = await dlcFile.OpenReadAsync();
+                    using var streamReader = new StreamReader(stream);
+                    while (!streamReader.EndOfStream)
                     {
-                        using var streamReader = new StreamReader(stream);
-                        while (!streamReader.EndOfStream)
+                        var line = streamReader.ReadLine();
+                        if (line != null && line.StartsWith("name"))
                         {
-                            var line = streamReader.ReadLine();
-                            if (line != null && line.StartsWith("name"))
-                            {
-                                return line.Split('=')[1].Trim().Trim('\"');
-                            }
+                            return line.Split('=')[1].Trim().Trim('\"');
                         }
                     }
                 }
@@ -175,23 +175,21 @@ namespace EPP.Services
                         return;
                     }
 
-                    using (ZipArchive archive = ZipFile.OpenRead(dlcFile.TryGetLocalPath()!))
+                    using ZipArchive archive = ZipFile.OpenRead(dlcFile.TryGetLocalPath()!);
+                    foreach (var entry in archive.Entries)
                     {
-                        foreach (var entry in archive.Entries)
+                        if (entry.FullName.EndsWith(".dds") && entry.FullName.Contains("event_pictures"))
                         {
-                            if (entry.FullName.EndsWith(".dds") && entry.FullName.Contains("event_pictures"))
+                            using (var stream = entry.Open())
                             {
-                                using (var stream = entry.Open())
+                                var picture = LoadZipPicture(stream);
+                                if (picture != null)
                                 {
-                                    var picture = LoadZipPicture(stream);
-                                    if (picture != null)
-                                    {
-                                        var name = Path.GetFileNameWithoutExtension(entry.Name);
+                                    var name = Path.GetFileNameWithoutExtension(entry.Name);
 
-                                        if (!_dlcGfxFiles.ContainsKey(name) && !_gfxFiles.ContainsKey(name))
-                                        {
-                                            _dlcGfxFiles.Add(name, new DlcPicture(picture, dlcName));
-                                        }
+                                    if (!_dlcGfxFiles.ContainsKey(name) && !_gfxFiles.ContainsKey(name))
+                                    {
+                                        _dlcGfxFiles.Add(name, new DlcPicture(picture, dlcName));
                                     }
                                 }
                             }

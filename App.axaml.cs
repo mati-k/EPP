@@ -28,6 +28,7 @@ namespace EPP
                 services.AddSingleton<IFileService>(x => new FileService(desktop));
                 services.AddSingleton<IGfxService, GfxService>();
                 services.AddSingleton<IConfigService>(configService);
+                services.AddSingleton<IFontService, FontService>();
                 Ioc.Default.ConfigureServices(services.BuildServiceProvider());
 
                 // Avoid duplicate validations from both Avalonia and the CommunityToolkit. 
