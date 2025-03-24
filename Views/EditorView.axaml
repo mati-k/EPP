@@ -9,6 +9,7 @@
              x:DataType="vm:EditorViewModel"
              xmlns:assist="clr-namespace:Material.Styles.Assists;assembly=Material.Styles"
              xmlns:converters="using:EPP.Converters"
+             xmlns:extensions="using:EPP.Extensions"
              xmlns:avalonia_converters="using:Avalonia.Controls.Converters"
              xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -76,10 +77,24 @@
       <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedEvent.SelectedPicture.Current, Mode=TwoWay, Converter={StaticResource PreventNull}}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
         <ListBox.ItemTemplate>
           <DataTemplate>
-            <StackPanel>
-              <TextBlock Text="{Binding Converter={x:Static converters:DDSConverter.AddDlcText}}" FontSize="12" TextAlignment="Center"/>
-              <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}" MaxHeight="132"/>  
-            </StackPanel>
+            <ListBoxItem PointerPressed="ListBoxItem_PointerPressed" Height="150">
+              <StackPanel>
+                <Grid>
+                  <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                  </Grid.ColumnDefinitions>
+                  <Panel Width="14" Height="14" Background="Transparent" Grid.Column="0" IsVisible="{Binding Converter={x:Static converters:DDSConverter.HasVariant}}">
+                    <materialIcons:MaterialIcon Kind="Animation" Width="14" Height="14" Foreground="{extensions:PrimaryColorExtension DeepPurple}"/>
+                    <ToolTip.Tip>
+                      <TextBlock Text="This picture has variants, click to open selector"/>
+                    </ToolTip.Tip>
+                  </Panel>
+                  <TextBlock Text="{Binding Converter={x:Static converters:DDSConverter.AddDlcText}}" FontSize="12" TextAlignment="Center" Grid.Column="1"/>
+                </Grid>
+                <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}" MaxHeight="132"/>  
+              </StackPanel>
+            </ListBoxItem>
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>

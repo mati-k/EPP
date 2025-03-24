@@ -69,11 +69,6 @@ namespace EPP.Views
 
                 span.Inlines.Add(formats[i].Substring(1));
 
-                //if (formatCharacters.Count == 0 || fontService.GetColorForKey(formatCharacters.Peek()) == null)
-                //{
-                //    span.Foreground = Brushes.White;
-                //}
-
                 if (formatCharacters.Count > 0 && fontService.GetColorForKey(formatCharacters.Peek()) != null)
                 {
                     span.Foreground = fontService.GetColorForKey(formatCharacters.Peek());

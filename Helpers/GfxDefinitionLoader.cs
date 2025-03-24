@@ -50,8 +50,8 @@ namespace EPP.Helpers
                     LoadFileContent(stream, item.Name);
                 }
             }
-
         }
+
         public void LoadFileContent(Stream stream, string name)
         {
             var fontService = Ioc.Default.GetService<IFontService>()!;

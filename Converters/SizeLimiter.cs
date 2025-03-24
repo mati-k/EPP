@@ -8,7 +8,7 @@ namespace EPP.Converters
 {
     public class SizeLimiter : IValueConverter
     {
-        private static readonly DDSConverter defaultInstace = new DDSConverter();
+        private static readonly SizeLimiter defaultInstace = new SizeLimiter();
 
         public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {

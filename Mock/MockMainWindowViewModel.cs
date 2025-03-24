@@ -6,7 +6,7 @@ namespace EPP.Mock
     {
         public MockMainWindowViewModel()
         {
-            CurrentPage = new MockConfigurationViewModel();
+            CurrentPage = new ConfigurationViewModel();
         }
     }
 }

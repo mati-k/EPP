@@ -1,9 +1,12 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.DependencyInjection;
+using DialogHostAvalonia;
 using EPP.Models;
 using EPP.Services;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace EPP.ViewModels
 {
@@ -16,7 +19,7 @@ namespace EPP.ViewModels
         private ModEvent _selectedEvent;
 
         [ObservableProperty]
-        [NotifyPropertyChangedFor("ActivePictures")]
+        [NotifyPropertyChangedFor(nameof(ActivePictures))]
         private ObservableCollection<string> _pictures = [];
 
         [ObservableProperty]
@@ -32,6 +35,7 @@ namespace EPP.ViewModels
 
         partial void OnSelectedEventChanged(ModEvent? oldValue, ModEvent newValue)
         {
+
             if (oldValue == newValue)
             {
                 return;
@@ -69,7 +73,7 @@ namespace EPP.ViewModels
             }
         }
 
-        private void ForceRefreshSelectedEventPicture(ModEvent modEvent)
+        private static void ForceRefreshSelectedEventPicture(ModEvent modEvent)
         {
             var tmp = modEvent.SelectedPicture;
             modEvent.SelectedPicture = null!;
@@ -88,6 +92,18 @@ namespace EPP.ViewModels
             {
                 Pictures = new ObservableCollection<string>(gfxService.GetPictureNames());
             }
+        }
+
+        public async Task ShowVariantDialog(string picture)
+        {
+            IGfxService gfxService = Ioc.Default.GetService<IGfxService>()!;
+            List<string> variants = gfxService.GetVariants(picture);
+            await DialogHost.Show(new PictureVariantDialogData(variants, SelectedEvent.SelectedPicture.Current, SelectVariant), "MainDialogHost");
+        }
+
+        private void SelectVariant(string picture)
+        {
+            SelectedEvent.SelectedPicture.Current = picture;
         }
     }
 }

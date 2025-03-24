@@ -16,8 +16,6 @@ using System.Threading.Tasks;
 
 namespace EPP.Services
 {
-    // todo: also load .gfx from dlc
-    // todo: handle picture variants (e.g. ANGRY_MOB_eventPicture, northamericagfx_ANGRY_MOB_eventPicture, east_slavic_ANGRY_MOB_eventPicture, etc.)
     public class GfxService : IGfxService
     {
         private readonly Dictionary<string, string> _gfxFiles = [];
@@ -31,6 +29,9 @@ namespace EPP.Services
         private readonly string _dlcPath = "dlc";
         private readonly string _builtIndlcPath = "builtin_dlc";
 
+        private readonly Dictionary<string, List<string>> _groupedPictures = [];
+        private readonly Dictionary<string, string> _basePictureCache = [];
+
         private readonly List<string> _interfaceIcons = [
             "events_BG_top",
             "events_BG_middle",
@@ -39,6 +40,7 @@ namespace EPP.Services
         ];
 
         private readonly GfxDefinitionLoader _gfxDefinitionLoader = new();
+        private readonly TagLoader _tagLoader = new();
 
         public async Task LoadSourceDirectory(string? path)
         {
@@ -48,6 +50,7 @@ namespace EPP.Services
             }
 
             await _gfxDefinitionLoader.Load(path);
+            await _tagLoader.Load(path);
             await LoadEventPictures(Path.Combine(path, _eventPicturesPath), _eventPicturesPath);
             await LoadEventInterface(path);
             await LoadDlcEventContent(Path.Combine(path, _builtIndlcPath), true);
@@ -306,6 +309,70 @@ namespace EPP.Services
 
             _gfxFiles.Clear();
             _dlcGfxFiles.Clear();
+
+            _groupedPictures.Clear();
+            _basePictureCache.Clear();
+
+            HashSet<string> pictures = [.. _picturePaths.Keys, .. _dlcPictures.Keys];
+            foreach (var picture in pictures)
+            {
+                if (!picture.Contains("eventPicture"))
+                {
+                    continue;
+                }
+
+                string basePicture = CalculateBasePicture(picture);
+                if (pictures.Contains(basePicture))
+                {
+                    if (!_groupedPictures.ContainsKey(basePicture))
+                    {
+                        // Make sure base picture will be at top
+                        _groupedPictures[basePicture] = [basePicture];
+                        _basePictureCache[basePicture] = basePicture;
+                    }
+
+                    if (!picture.Equals(basePicture))
+                    {
+                        _groupedPictures[basePicture].Add(picture);
+                        _basePictureCache[picture] = basePicture;
+                    }
+                }
+                else
+                {
+                    // If the base picture doesn't exist, there is no grouping
+                    _groupedPictures[picture] = [picture];
+                    _basePictureCache[picture] = picture;
+                }
+            }
+        }
+
+        private string CalculateBasePicture(string picture)
+        {
+            if (!picture.Contains("_"))
+            {
+                return picture;
+            }
+
+            int separationPosition = picture.IndexOf('_');
+            string prefix = picture.Substring(0, separationPosition);
+            string suffix = picture.Substring(separationPosition + 1);
+            if (_tagLoader.IsCountryTag(prefix))
+            {
+                return suffix;
+            }
+            else if (prefix == prefix.ToLower())
+            {
+                while (prefix == prefix.ToLower())
+                {
+                    suffix = picture.Substring(separationPosition + 1);
+                    separationPosition = picture.IndexOf('_', separationPosition + 1);
+                    prefix = picture.Substring(0, separationPosition);
+                }
+
+                return suffix;
+            }
+
+            return picture;
         }
 
         private static PixelFormat PixelFormat(IImage image)
@@ -339,9 +406,37 @@ namespace EPP.Services
 
         public List<string> GetPictureNames()
         {
-            return _picturePaths.Keys.Where(key => key.Contains("eventPicture"))
-                .Concat(_dlcPictures.Keys.Where(key => key.Contains("eventPicture")))
-                .ToList();
+            return _groupedPictures.Keys.ToList();
+        }
+
+        public bool HasVariants(string? picture)
+        {
+            if (string.IsNullOrEmpty(picture) || !_groupedPictures.ContainsKey(picture))
+            {
+                return false;
+            }
+
+            return _groupedPictures[picture].Count > 1;
+        }
+
+        public List<string> GetVariants(string? picture)
+        {
+            if (string.IsNullOrEmpty(picture) || !_groupedPictures.ContainsKey(picture))
+            {
+                return [];
+            }
+
+            return _groupedPictures[picture]!;
+        }
+
+        public string GetBasePicture(string? picture)
+        {
+            if (picture == null || !_basePictureCache.ContainsKey(picture))
+            {
+                return String.Empty;
+            }
+
+            return _basePictureCache[picture];
         }
     }
 }

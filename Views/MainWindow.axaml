@@ -9,6 +9,7 @@
         x:DataType="vm:MainWindowViewModel"
         xmlns:mock="using:EPP.Mock"
         xmlns:converters="using:EPP.Converters"
+        xmlns:materialIcons="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
         Icon="/Assets/avalonia-logo.ico"
         xmlns:controls="clr-namespace:Material.Styles.Controls;assembly=Material.Styles"
         xmlns:dialogHostAvalonia="clr-namespace:DialogHostAvalonia;assembly=DialogHost.Avalonia"
@@ -23,6 +24,39 @@
         <TextBlock Text="{Binding Text}" HorizontalAlignment="Center" TextWrapping="Wrap"/>
         <Button Content="Ok" Width="120" Command="{Binding RelativeSource={RelativeSource FindAncestor, AncestorType=dialogHostAvalonia:DialogHost}, Path=CloseDialogCommand}"/>
       </StackPanel>
+    </DataTemplate>
+    <DataTemplate DataType="model:PictureVariantDialogData">
+      <Grid MaxHeight="600">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="auto" />
+          <RowDefinition Height="*" />
+          <RowDefinition Height="auto" />
+        </Grid.RowDefinitions>
+        <StackPanel Orientation="Horizontal" Spacing="8" Grid.Row="0">
+          <TextBlock Text="Pick picture variant" Classes="Headline6"/>
+          <Panel Width="22" Height="22" Background="Transparent">
+            <materialIcons:MaterialIcon Kind="QuestionMarkCircleOutline" Width="22" Height="22" />
+            <ToolTip.Tip>
+              <TextBlock>
+                This picture has some variants. If you pick the base picture (topmost one, without prefix), the game may show<LineBreak />
+                one of the variants instead if the name matches the conditions based on the initial part of the name<LineBreak />
+                If you instead pick one of variants specificaly, it will always be shown.
+              </TextBlock>
+            </ToolTip.Tip>
+          </Panel>
+        </StackPanel>
+        <ListBox ItemsSource="{Binding Variants}" SelectedItem="{Binding Selected, Mode=TwoWay}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1" Margin="0,12">
+          <ListBox.ItemTemplate>
+            <DataTemplate>
+              <StackPanel>
+                <TextBlock Text="{Binding Converter={x:Static converters:DDSConverter.AddDlcText}}" FontSize="12" TextAlignment="Center"/>
+                <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}" MaxHeight="132"/>
+              </StackPanel>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+        <Button Content="Confirm" Command="{Binding ConfirmCommand}" Grid.Row="2"/>
+      </Grid>
     </DataTemplate>
   </Window.DataTemplates>
 

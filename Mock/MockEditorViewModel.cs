@@ -1,4 +1,5 @@
-﻿using EPP.ViewModels;
+﻿using EPP.Models;
+using EPP.ViewModels;
 
 namespace EPP.Mock
 {
@@ -6,11 +7,13 @@ namespace EPP.Mock
     {
         public MockEditorViewModel() : base()
         {
+            EventPicture picture = new EventPicture("");
+
             EventFile = new();
-            EventFile.Events.Add(new() { Title = "Event 1" });
-            EventFile.Events.Add(new() { Title = "Event 2" });
-            EventFile.Events.Add(new() { Title = "Event with longer name" });
-            EventFile.Events.Add(new() { Title = "Event with very long and even longer name" });
+            EventFile.Events.Add(new() { Title = "Event 1", SelectedPicture = picture });
+            EventFile.Events.Add(new() { Title = "Event 2", SelectedPicture = picture });
+            EventFile.Events.Add(new() { Title = "Event with longer name", SelectedPicture = picture });
+            EventFile.Events.Add(new() { Title = "Event with very long and even longer name", SelectedPicture = picture });
 
             SelectedEvent = EventFile.Events[0];
         }

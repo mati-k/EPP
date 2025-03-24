@@ -11,5 +11,8 @@ namespace EPP.Services
         public Bitmap? GetPicture(string? name);
         public string? GetNameWithDlcText(string? name);
         public List<string> GetPictureNames();
+        public bool HasVariants(string? picture);
+        public List<string> GetVariants(string? picture);
+        public string GetBasePicture(string? picture);
     }
 }

@@ -50,7 +50,7 @@ namespace EPP.ViewModels
 
                 if (!string.IsNullOrEmpty(config.LocalizationPath))
                 {
-                    Localization localization = new();
+                    LocalizationLoader localization = new();
                     await localization.LoadFromFileAsync(config.LocalizationPath);
                     EventFile.BindLocalization(localization);
                 }

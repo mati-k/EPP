@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using EPP.Helpers;
 using Pdoxcl2Sharp;
 using System.Collections.ObjectModel;
 using System.Linq;
@@ -33,7 +34,7 @@ namespace EPP.Models
             }
         }
 
-        public void BindLocalization(Localization localization)
+        public void BindLocalization(LocalizationLoader localization)
         {
             foreach (ModEvent modEvent in Events)
             {

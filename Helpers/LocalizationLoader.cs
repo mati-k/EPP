@@ -1,13 +1,14 @@
 ﻿using DialogHostAvalonia;
+using EPP.Models;
 using Serilog;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
-namespace EPP.Models
+namespace EPP.Helpers
 {
-    public class Localization
+    public class LocalizationLoader
     {
         Dictionary<string, string> _entries = new();
 
@@ -23,7 +24,7 @@ namespace EPP.Models
                         {
                             string? line = reader.ReadLine();
 
-                            if (String.IsNullOrWhiteSpace(line))
+                            if (string.IsNullOrWhiteSpace(line))
                                 continue;
 
                             line = line.Trim();
