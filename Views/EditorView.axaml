@@ -74,7 +74,7 @@
         <RowDefinition Height="*"/>
       </Grid.RowDefinitions>
       <TextBox Text="{Binding PictureQuery}" Width="512" Watermark="Filter pictures..." Grid.Row="0" Margin="0,0,0,10"/>
-      <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedEvent.SelectedPicture.Current, Mode=TwoWay, Converter={StaticResource PreventNull}}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
+      <ListBox ItemsSource="{Binding ActivePictures}" SelectedItem="{Binding SelectedEvent.SelectedPicture.CurrentBasePicture, Mode=TwoWay, Converter={StaticResource PreventNull}}" Width="512" ScrollViewer.VerticalScrollBarVisibility="Auto" Grid.Row="1">
         <ListBox.ItemTemplate>
           <DataTemplate>
             <ListBoxItem PointerPressed="ListBoxItem_PointerPressed" Height="150">
@@ -90,9 +90,23 @@
                       <TextBlock Text="This picture has variants, click to open selector"/>
                     </ToolTip.Tip>
                   </Panel>
-                  <TextBlock Text="{Binding Converter={x:Static converters:DDSConverter.AddDlcText}}" FontSize="12" TextAlignment="Center" Grid.Column="1"/>
+                  <TextBlock FontSize="12" TextAlignment="Center" Grid.Column="1">
+                    <TextBlock.Text>
+                      <MultiBinding Converter="{x:Static converters:DDSConverter.AddDlcAndPrefixText}">
+                        <Binding />
+                        <Binding Path="((vm:EditorViewModel)DataContext).SelectedEvent.SelectedPicture.Current" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}"/>
+                      </MultiBinding>
+                    </TextBlock.Text>
+                  </TextBlock>
                 </Grid>
-                <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}" MaxHeight="132"/>  
+                <Image Source="{Binding Converter={x:Static converters:DDSConverter.LoadDDS}}" MaxHeight="132">
+                  <Image.Source>
+                    <MultiBinding Converter="{x:Static converters:DDSConverter.LoadWithVariantDDS}">
+                      <Binding />
+                      <Binding Path="((vm:EditorViewModel)DataContext).SelectedEvent.SelectedPicture.Current" RelativeSource="{RelativeSource Mode=FindAncestor, AncestorType=UserControl}"/>
+                    </MultiBinding>
+                  </Image.Source>
+                </Image>
               </StackPanel>
             </ListBoxItem>
           </DataTemplate>

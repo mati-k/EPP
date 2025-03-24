@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.DependencyInjection;
+using EPP.Services;
 using Pdoxcl2Sharp;
 
 namespace EPP.Models
@@ -6,12 +8,27 @@ namespace EPP.Models
     public partial class EventPicture : ObservableObject, IParadoxRead
     {
         [ObservableProperty]
+        [NotifyPropertyChangedFor(nameof(CurrentBasePicture))]
         private string _current = "";
         [ObservableProperty]
         private string _original = "";
         [ObservableProperty]
         private bool _isSimplePicture = true;
         private GroupNode? _trigger;
+
+        public string CurrentBasePicture
+        {
+            get
+            {
+                return Ioc.Default?.GetService<IGfxService>()?.GetBasePicture(Current) ?? "";
+            }
+            set
+            {
+                Current = value;
+            }
+        }
+
+
         public string TriggerText
         {
             get
