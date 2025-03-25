@@ -61,15 +61,12 @@ namespace EPP.Helpers
                         return;
                     }
 
-                    foreach (var picture in modEvent.Pictures)
+                    if (modEvent.IsChanged)
                     {
-                        if (picture.IsChanged)
+                        bool wasSafeSuccess = await ReplacePictures(modEvent, fileContent, eventStart);
+                        if (!wasSafeSuccess)
                         {
-                            bool wasSafeSuccess = await ReplacePictures(modEvent, fileContent, eventStart);
-                            if (!wasSafeSuccess)
-                            {
-                                return;
-                            }
+                            return;
                         }
                     }
                 }
