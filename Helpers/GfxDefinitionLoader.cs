@@ -72,7 +72,7 @@ namespace EPP.Helpers
             gfxFileData.Gfx.ToList().ForEach(gfx =>
             {
                 if (gfx.TextureFile != null && !PicturePathDefinitions.Any(item => item.Name == gfx.Name)
-                    && TransformPathToCommonFormat(gfx.TextureFile).StartsWith("gfx/") && gfx.TextureFile.Contains("eventPicture")
+                    && TransformPathToCommonFormat(gfx.TextureFile).StartsWith("gfx/") && gfx.Name.Contains("eventPicture")
                 )
                 {
                     gfx.TextureFile = TransformPathToCommonFormat(gfx.TextureFile);
