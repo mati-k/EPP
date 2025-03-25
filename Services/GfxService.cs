@@ -10,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.IO.Compression;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 
@@ -245,50 +244,6 @@ namespace EPP.Services
             }
         }
 
-        public Bitmap? GetPicture(string? name)
-        {
-            if (name == null)
-            {
-                return null;
-            }
-
-            if (_dlcPictures.TryGetValue(name, out DlcPicture? value))
-            {
-                return value.Picture;
-            }
-
-            if (!_picturePaths.TryGetValue(name, out string? filePath))
-            {
-                return null;
-            }
-
-            if (!File.Exists(filePath))
-            {
-                return null;
-            }
-
-            try
-            {
-                using var image = Pfimage.FromFile(filePath);
-                try
-                {
-                    var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
-                    return new Bitmap(PixelFormat(image), AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
-                }
-
-                catch (Exception e)
-                {
-                    Log.Error(e, $"Error while loading picture {name}");
-                    return null;
-                }
-            }
-            catch (Exception e)
-            {
-                Log.Error(e, $"Error while loading picture {name}");
-                return null;
-            }
-        }
-
         public void GeneratePaths()
         {
             foreach (var pathDefinition in _gfxDefinitionLoader.PicturePathDefinitions)
@@ -348,7 +303,7 @@ namespace EPP.Services
 
         private string CalculateBasePicture(string picture)
         {
-            if (!picture.Contains("_"))
+            if (!picture.Contains('_'))
             {
                 return picture;
             }
@@ -375,7 +330,52 @@ namespace EPP.Services
             return picture;
         }
 
-        private static PixelFormat PixelFormat(IImage image)
+
+        public Bitmap? GetPicture(string? name)
+        {
+            if (name == null)
+            {
+                return null;
+            }
+
+            if (_dlcPictures.TryGetValue(name, out DlcPicture? value))
+            {
+                return value.Picture;
+            }
+
+            if (!_picturePaths.TryGetValue(name, out string? filePath))
+            {
+                return null;
+            }
+
+            if (!File.Exists(filePath))
+            {
+                return null;
+            }
+
+            try
+            {
+                using var image = Pfimage.FromFile(filePath);
+                try
+                {
+                    var data = Marshal.UnsafeAddrOfPinnedArrayElement(image.Data, 0);
+                    return new Bitmap(PixelFormat(image), AlphaFormat.Unpremul, data, new Avalonia.PixelSize(image.Width, image.Height), new Avalonia.Vector(96, 96), image.Stride);
+                }
+
+                catch (Exception e)
+                {
+                    Log.Error(e, $"Error while loading picture {name}");
+                    return null;
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e, $"Error while loading picture {name}");
+                return null;
+            }
+        }
+
+        public static PixelFormat PixelFormat(IImage image)
         {
             return image.Format switch
             {
@@ -406,7 +406,7 @@ namespace EPP.Services
 
         public List<string> GetPictureNames()
         {
-            return _groupedPictures.Keys.ToList();
+            return [.. _groupedPictures.Keys];
         }
 
         public bool HasVariants(string? picture)

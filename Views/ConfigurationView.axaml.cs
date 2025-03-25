@@ -7,14 +7,14 @@ namespace EPP.Views;
 
 public partial class ConfigurationView : UserControl
 {
-    private static FilePickerFileType LocalizationFiles { get; } = new("Localization files") { Patterns = new[] { "*.yml" } };
+    private static FilePickerFileType LocalizationFiles { get; } = new("Localization files") { Patterns = ["*.yml"] };
 
     public ConfigurationView()
     {
         InitializeComponent();
     }
 
-    private ConfigurationViewModel ViewModel => (ConfigurationViewModel)DataContext;
+    private ConfigurationViewModel ViewModel => (ConfigurationViewModel)DataContext!;
 
     private async void EventFile_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
@@ -40,7 +40,7 @@ public partial class ConfigurationView : UserControl
     {
         var topLevel = TopLevel.GetTopLevel(this);
 
-        var folders = await topLevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
+        var folders = await topLevel!.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions
         {
             Title = "Select directory",
             AllowMultiple = false,
@@ -49,7 +49,7 @@ public partial class ConfigurationView : UserControl
 
         if (folders.Count >= 1)
         {
-            ViewModel.SourceDirectories.Add(folders[0].TryGetLocalPath());
+            ViewModel.SourceDirectories.Add(folders[0].TryGetLocalPath()!);
             ViewModel.StartCommand.NotifyCanExecuteChanged();
         }
 
@@ -59,16 +59,16 @@ public partial class ConfigurationView : UserControl
     {
         var topLevel = TopLevel.GetTopLevel(this);
 
-        var files = await topLevel.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        var files = await topLevel!.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
         {
             Title = title,
             AllowMultiple = false,
-            FileTypeFilter = new[] { filter }
+            FileTypeFilter = [filter]
         });
 
         if (files.Count >= 1)
         {
-            return files[0].TryGetLocalPath();
+            return files[0].TryGetLocalPath()!;
         }
 
         return "";

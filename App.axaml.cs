@@ -1,4 +1,5 @@
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
@@ -37,7 +38,12 @@ namespace EPP
                     DataContext = new MainWindowViewModel(),
                 };
             }
-
+            else if (Design.IsDesignMode)
+            {
+                var services = new ServiceCollection();
+                services.AddSingleton<IGfxService, MockGfxService>();
+                Ioc.Default.ConfigureServices(services.BuildServiceProvider());
+            }
 
             base.OnFrameworkInitializationCompleted();
         }
