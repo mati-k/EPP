@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace EPP.Helpers
@@ -28,7 +29,7 @@ namespace EPP.Helpers
             List<string> fileContent = new();
             await using (var stream = await file.OpenReadAsync())
             {
-                using var streamReader = new StreamReader(stream);
+                using var streamReader = new StreamReader(stream, Encoding.GetEncoding(1252));
                 while (!streamReader.EndOfStream)
                 {
                     var line = streamReader.ReadLine();
@@ -43,7 +44,7 @@ namespace EPP.Helpers
                 streamReader.BaseStream.Seek(0, SeekOrigin.Begin);
 
                 // Store line ending to keep what file used
-                if (streamReader.ReadToEnd().EndsWith("\r\n"))
+                if (streamReader.ReadToEnd().Contains("\r\n"))
                 {
                     lineEnding = "\r\n";
                 }
@@ -74,7 +75,7 @@ namespace EPP.Helpers
 
             await using (var stream = await file.OpenWriteAsync())
             {
-                using var streamWriter = new StreamWriter(stream);
+                using var streamWriter = new StreamWriter(stream, Encoding.GetEncoding(1252));
                 streamWriter.NewLine = lineEnding;
                 foreach (var line in fileContent)
                 {

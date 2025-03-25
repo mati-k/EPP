@@ -9,6 +9,7 @@ using EPP.ViewModels;
 using EPP.Views;
 using Microsoft.Extensions.DependencyInjection;
 using System.Linq;
+using System.Text;
 
 namespace EPP
 {
@@ -21,6 +22,8 @@ namespace EPP
 
         public override void OnFrameworkInitializationCompleted()
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
             if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             {
                 var services = new ServiceCollection();
