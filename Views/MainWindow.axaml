@@ -19,6 +19,13 @@
         <mock:MockMainWindowViewModel/>
     </Design.DataContext>
 
+  <Window.Styles>
+    <Style Selector="Menu">
+      <Setter Property="Background" Value="{DynamicResource MaterialPrimaryMidBrush}" />
+      <Setter Property="Foreground" Value="{DynamicResource MaterialPrimaryMidForegroundBrush}" />
+    </Style>
+  </Window.Styles>
+  
   <Window.DataTemplates>
     <DataTemplate DataType="model:InfoDialogData">
       <StackPanel Spacing="12" Width="240">
@@ -68,6 +75,12 @@
   <dialogHostAvalonia:DialogHost Identifier="MainDialogHost" DialogMargin="16" CloseOnClickAway="True" dialogHostAvalonia:DialogHostStyle.CornerRadius="8">
     <DockPanel>
       <Menu DockPanel.Dock="Top">
+        <Menu.Styles>
+          <Style Selector="Border">
+            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDividerBrush}" />
+            <Setter Property="BorderThickness" Value="2" />
+          </Style>
+        </Menu.Styles>
         <MenuItem Header="_File">
           <MenuItem Header="_Save" Command="{Binding SaveCommand}"/>
           <MenuItem Header="_Reset All" Command="{Binding ResetAllCommand}" />
