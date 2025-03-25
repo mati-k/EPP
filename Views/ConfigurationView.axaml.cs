@@ -1,6 +1,9 @@
 using Avalonia.Controls;
 using Avalonia.Platform.Storage;
 using EPP.ViewModels;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace EPP.Views;
@@ -8,6 +11,7 @@ namespace EPP.Views;
 public partial class ConfigurationView : UserControl
 {
     private static FilePickerFileType LocalizationFiles { get; } = new("Localization files") { Patterns = ["*.yml"] };
+    private ConfigurationViewModel viewModel { get => (ConfigurationViewModel)DataContext!; }
 
     public ConfigurationView()
     {
@@ -18,7 +22,8 @@ public partial class ConfigurationView : UserControl
 
     private async void EventFile_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        string filePath = await SelectFile("Select Event File", FilePickerFileTypes.TextPlain);
+        var hints = GetStartHints(viewModel.EventPath, viewModel.LocalizationPath, "events");
+        string filePath = await SelectFile("Select Event File", FilePickerFileTypes.TextPlain, hints);
 
         if (!string.IsNullOrEmpty(filePath))
         {
@@ -28,7 +33,8 @@ public partial class ConfigurationView : UserControl
 
     private async void LocalizationFile_Click(object? sender, Avalonia.Interactivity.RoutedEventArgs e)
     {
-        string filePath = await SelectFile("Select Localization File", LocalizationFiles);
+        var hints = GetStartHints(viewModel.LocalizationPath, viewModel.EventPath, "localisation");
+        string filePath = await SelectFile("Select Localization File", LocalizationFiles, hints);
 
         if (!string.IsNullOrEmpty(filePath))
         {
@@ -55,16 +61,67 @@ public partial class ConfigurationView : UserControl
 
     }
 
-    private async ValueTask<string> SelectFile(string title, FilePickerFileType filter)
+    private List<string?> GetStartHints(string currentFile, string complementaryFile, string endFolder)
+    {
+        List<string?> hints = [];
+        if (currentFile != null)
+        {
+            try
+            {
+                hints.Add(Path.GetDirectoryName(currentFile));
+            }
+            catch { }
+        }
+
+        if (complementaryFile != null)
+        {
+            try
+            {
+                string? parentDirectory = Directory.GetParent(Path.GetDirectoryName(complementaryFile) ?? "")?.FullName;
+                if (parentDirectory != null)
+                {
+                    hints.Add(Path.Combine(parentDirectory, endFolder));
+                }
+            }
+            catch { }
+        }
+
+        if (ViewModel.SourceDirectories.Count > 0)
+        {
+            try
+            {
+                hints.Add(Path.Combine(viewModel.SourceDirectories.Last(), endFolder));
+            }
+            catch { };
+        }
+
+        return hints;
+    }
+
+    private async ValueTask<string> SelectFile(string title, FilePickerFileType filter, List<string?> hints)
     {
         var topLevel = TopLevel.GetTopLevel(this);
 
-        var files = await topLevel!.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        FilePickerOpenOptions options = new()
         {
             Title = title,
             AllowMultiple = false,
             FileTypeFilter = [filter]
-        });
+        };
+
+        foreach (var hint in hints)
+        {
+            if (hint != null)
+            {
+                if (await topLevel!.StorageProvider.TryGetFolderFromPathAsync(hint) is IStorageFolder folder)
+                {
+                    options.SuggestedStartLocation = folder;
+                    break;
+                }
+            }
+        }
+
+        var files = await topLevel!.StorageProvider.OpenFilePickerAsync(options);
 
         if (files.Count >= 1)
         {
