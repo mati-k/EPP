@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace EPP.Helpers
@@ -125,8 +126,10 @@ namespace EPP.Helpers
                 if (balance[i - 1] == 1 && line.Contains("id"))
                 {
                     // Clear comments and make sure full words will be compared instead of regular contains check (e.g. event with id 501 vs id of 50)
-                    line = line.Split("#")[0].Trim().Replace("=", "").Replace("  ", " ");
-                    if (line.Split()[1] == modEvent.Id)
+                    line = Regex.Replace(line.Split("#")[0].Trim().Replace("=", " "), @"\s{2,}", " ");
+                    string[] splitLine = line.Split();
+
+                    if (splitLine.Length > 1 && splitLine[1] == modEvent.Id)
                     {
                         idPosition = i;
                         break;
